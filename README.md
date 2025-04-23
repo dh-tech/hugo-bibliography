@@ -1,1 +1,7 @@
-# hugo-bibliography
+# Theme Name
+
+## Features
+
+## Installation
+
+## Configuration
