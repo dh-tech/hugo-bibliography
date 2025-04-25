@@ -1,4 +1,4 @@
-# Theme Name
+# Hugo Bibliography
 
 ## Features
 
