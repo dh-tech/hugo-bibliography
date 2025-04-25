@@ -1,6 +1,6 @@
-name = 'Theme name'
+name = 'Hugo Bibliography'
 license = 'MIT'
-licenselink = 'https://github.com/owner/repo/LICENSE'
+licenselink = 'https://github.com/dh-tech/hugo-bibliography/blob/main/LICENSE'
 description = 'Theme description'
 
 # The home page of the theme, where the source can be found
