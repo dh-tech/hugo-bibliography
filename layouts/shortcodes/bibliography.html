@@ -1,6 +1,14 @@
+<style>
+    .apa-citation {
+        margin-bottom: 1rem;
+        text-indent: -2rem;
+        padding-left: 2rem;
+    }
+</style>
+
 {{- range site.Data.bibliography }}
 {{- if eq .itemType "journalArticle"}}
-<p>
+<p class="apa-citation">
     {{- $authors := slice -}}
     {{- range .creators }}
     {{- if eq .creatorType "author" }}
