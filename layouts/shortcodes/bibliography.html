@@ -6,45 +6,52 @@
     }
 </style>
 
+{{- $entries := slice -}}
+
 {{- range site.Data.bibliography }}
-{{- if eq .itemType "journalArticle"}}
-<p class="apa-citation">
-    {{- $authors := slice -}}
-    {{- range .creators }}
-    {{- if eq .creatorType "author" }}
-    {{- $firstInitial := "" -}}
-    {{- if .firstName }}
-    {{- $firstInitial = print (substr .firstName 0 1) "." }}
-    {{- end }}
-    {{- if .lastName }}
-    {{- $name := printf "%s, %s" .lastName $firstInitial }}
-    {{- $authors = $authors | append $name }}
-    {{- end }}
-    {{- end }}
-    {{- end }}
-    {{- $authorStr := delimit $authors ", " -}}
+{{- if eq .itemType "journalArticle" }}
+{{- $authors := slice -}}
+{{- range .creators }}
+{{- if eq .creatorType "author" }}
+{{- $firstInitial := "" -}}
+{{- if .firstName }}
+{{- $firstInitial = print (substr .firstName 0 1) "." }}
+{{- end }}
+{{- if .lastName }}
+{{- $name := printf "%s, %s" .lastName $firstInitial }}
+{{- $authors = $authors | append $name }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- $authorStr := delimit $authors ", " -}}
+{{- $entry := dict "authorStr" $authorStr "entry" . -}}
+{{- $entries = $entries | append $entry }}
+{{- end }}
+{{- end }}
 
+{{- $sortedEntries := sort $entries "authorStr" -}}
 
-    {{- $year := "" -}}
-    {{- with .date }}
-    {{- $splitDate := split . "-" }}
-    {{- if gt (len $splitDate) 0 }}
-    {{- $year = index $splitDate 0 }}
-    {{- end }}
-    {{- end }}
+{{- range $sortedEntries }}
+{{- $data := .entry }}
+{{- $authorStr := .authorStr }}
 
-    {{- $title := .title | markdownify | plainify }}
-    {{- $journal := .publicationTitle }}
-    {{- $volume := .volume }}
-    {{- $issue := .issue }}
-    {{- $pages := .pages }}
-    {{- $doi := .DOI }}
+{{- $year := "" -}}
+{{- with $data.date }}
+{{- $splitDate := split . "-" }}
+{{- if gt (len $splitDate) 0 }}
+{{- $year = index $splitDate 0 }}
+{{- end }}
+{{- end }}
 
+{{- $title := $data.title | markdownify | plainify }}
+{{- $journal := $data.publicationTitle }}
+{{- $volume := $data.volume }}
+{{- $issue := $data.issue }}
+{{- $pages := $data.pages }}
+{{- $doi := $data.DOI }}
 
-    {{- $citation := printf "%s (%s). <em>%s</em>. <i>%s</i>, %s(%s), %s. https://doi.org/%s" $authorStr $year $title
-    $journal $volume $issue $pages $doi }}
+{{- $citation := printf "%s (%s). %s. <i>%s</i>, <i>%s</i>(%s), %s. https://doi.org/%s" $authorStr $year $title $journal
+$volume $issue $pages $doi }}
 
-    {{ $citation | safeHTML }}
-</p>
-{{- end}}
+<p class="apa-citation">{{ $citation | safeHTML }}</p>
 {{- end }}
