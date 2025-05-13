@@ -6,8 +6,16 @@
     }
 </style>
 
+
+{{ $onlyCited := .IsNamedParams | and (eq (.Get "cited") "true") }}
+{{ $citedTitles := .Page.Scratch.Get "cited_titles" | default (slice) }}
+
 {{- range site.Data.bibliography }}
+{{ $key := .title }}
 {{- if eq .itemType "journalArticle"}}
+
+{{- if or (not $onlyCited) (in $citedTitles .title) }}
+
 <p class="apa-citation">
     {{- $authors := slice -}}
     {{- range .creators }}
@@ -41,10 +49,11 @@
     {{- $doi := .DOI }}
 
 
-    {{- $citation := printf "%s (%s). <em>%s</em>. <i>%s</i>, %s(%s), %s. https://doi.org/%s" $authorStr $year $title
+    {{- $citation := printf "%s (%s). %s. <i>%s</i>, <i>%s</i>(%s), %s. https://doi.org/%s" $authorStr $year $title
     $journal $volume $issue $pages $doi }}
 
     {{ $citation | safeHTML }}
 </p>
 {{- end}}
+{{- end }}
 {{- end }}

@@ -1,0 +1,39 @@
+{{ $title := .Get "title" }}
+
+{{- $.Page.Scratch.Add "cited_titles" $title -}}
+
+{{- range site.Data.bibliography }}
+{{- if eq .itemType "journalArticle"}}
+{{- if eq .title $title }}
+<p>
+    {{- $authors := slice -}}
+    {{- range .creators }}
+
+    {{- if eq .creatorType "author" }}
+    {{- if .lastName }}
+    {{- $name := printf "%s" .lastName}}
+    {{- $authors = $authors | append $name }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+
+    {{$authorStr := ""}}
+    {{- if eq (len $authors) 1 }}
+    {{- $authorStr = (index (split (index $authors 0) ",") 0 ) -}}
+    {{- end}}
+    {{- if eq (len $authors) 2 }}
+    {{ $authorStr = printf "%s & %s " (index (split (index $authors 0) ",") 0) (index (split (index $authors 1) ",") 0)
+    }}
+    {{- end}}
+    {{- if eq (len $authors) 3 }}
+    {{$authorStr = printf "%s et al." (index (split (index $authors 0) ",") 0 )}}
+    {{- end}}
+    {{- if gt (len $authors) 3 }}
+    {{$authorStr = printf "%s et al." (index (split (index $authors 0) ",") 0 )}}
+    {{- end}}
+
+    ({{$authorStr}}, {{ .date }})
+</p>
+{{- end}}
+{{- end}}
+{{- end }}
