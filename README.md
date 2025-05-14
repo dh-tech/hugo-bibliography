@@ -1,8 +1,48 @@
 # Hugo Bibliography
 
+Hugo Bibliography is a Hugo Module designed to help you fetch and format bibliography data. This module comes with scripts and shortcodes you can seamlessly integrate into your project to quickly add an in-text citation or Bibliography page to your static site. 
+
 ## Features
 
+All of the shortcodes rely on CSL-JSON data in /data/bibliography.json
+
+#### Bibliography
+
+To add a full bibliography, call the bibliography shortcode with the following:
+
+`{{<bibliography>}}`
+
+You can add a parameter to limit the scope of the bibliography.
+
+`{{<bibliography key="journalArticle">}}`
+
+The above shortcode will now only render entries of the bibliography that includes the keyword "journalArticle."
+
+An in-text citation can be generated using the cite shortcode and a specific title.
+
+#### Cite
+
+`{{<cite title="Title Of Work">}}`
+
+Finally, you can generate a bibliography of only the works that have been cited on a given page.
+
+`{{<bibliography cited="true">}}`
+
+#### fetch-zotero.sh
+
+fetch-zotero is a script that comes with hugo-bibliography. It allows you to fetch bibliography data from a Zotero group prior to your hugo build. This ensures your bibliography data stays up to date with activity in your zotero group.
+
+For more information on using this script in your project, see Configuration.
+
 ## Installation
+
+To use Hugo-bibliography, simply add the module as a theme in your hugo project.
+
+`git submodule add https://github.com/dh-tech/hugo-bibliography.git themes/hugo-bibliography`
+
+Then add the theme in your hugo.toml file.
+
+`theme = ['hugo-bibliography']`
 
 ## Configuration
 
