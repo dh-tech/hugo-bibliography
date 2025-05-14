@@ -32,22 +32,26 @@
     {{- end }}
     {{- $authorStr := delimit $authors ", " -}}
 
+    {{- $sortedEntries := sort $entries "authorStr" -}}
+
+    {{- range $sortedEntries }}
+    {{- $data := .entry }}
+    {{- $authorStr := .authorStr }}
 
     {{- $year := "" -}}
-    {{- with .date }}
+    {{- with $data.date }}
     {{- $splitDate := split . "-" }}
     {{- if gt (len $splitDate) 0 }}
     {{- $year = index $splitDate 0 }}
     {{- end }}
     {{- end }}
 
-    {{- $title := .title | markdownify | plainify }}
-    {{- $journal := .publicationTitle }}
-    {{- $volume := .volume }}
-    {{- $issue := .issue }}
-    {{- $pages := .pages }}
-    {{- $doi := .DOI }}
-
+    {{- $title := $data.title | markdownify | plainify }}
+    {{- $journal := $data.publicationTitle }}
+    {{- $volume := $data.volume }}
+    {{- $issue := $data.issue }}
+    {{- $pages := $data.pages }}
+    {{- $doi := $data.DOI }}
 
     {{- $citation := printf "%s (%s). %s. <i>%s</i>, <i>%s</i>(%s), %s. https://doi.org/%s" $authorStr $year $title
     $journal $volume $issue $pages $doi }}
