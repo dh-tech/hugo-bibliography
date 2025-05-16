@@ -6,6 +6,8 @@
     }
 </style>
 
+{{- $citations := slice -}}
+
 {{- $context := . }}
 {{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
 {{- $citedTitles := $context.Page.Scratch.Get "cited_titles" | default (slice) }}
@@ -29,7 +31,6 @@
     {{ warnf "entry title: %s include: %v" $entry.title $include }}
 
     {{- if and $include (or (not $onlyCited) (in $citedTitles $entry.title)) }}
-        <p class="apa-citation">
             {{- $authors := slice }}
             {{- range $entry.creators }}
                 {{- if eq .creatorType "author" }}
@@ -48,27 +49,34 @@
             {{- if ge (len $authors) 3 }}
                 {{- $authorStr = printf "%s et al." (index $authors 0) }}
             {{- end }}
-
-            {{- $year := "" }}
-            {{- with $entry.date }}
-                {{- $parts := split . "-" }}
-                {{- if gt (len $parts) 0 }}
-                    {{- $year = index $parts 0 }}
-                {{- end }}
-            {{- end }}
-
-            {{- $title := $entry.title | markdownify | plainify }}
-            {{- $journal := $entry.publicationTitle }}
-            {{- $volume := $entry.volume }}
-            {{- $issue := $entry.issue }}
-            {{- $pages := $entry.pages }}
-            {{- $doi := $entry.DOI }}
-
-            {{- $citation := printf "%s (%s). %s. <i>%s</i>, <i>%s</i>(%s), %s. https://doi.org/%s"
-                $authorStr $year $title
-                $journal $volume $issue $pages $doi }}
-
-            {{ $citation | safeHTML }}
-        </p>
+            {{- $citation := dict "authorStr" $authorStr "citation" $entry -}}
+            {{- $citations = $citations | append $citation }}
     {{- end }}
+{{- end }}
+{{- $sortedCitations := sort $citations "authorStr" -}}
+
+{{- range $sortedCitations }}
+    {{- $data := .citation }}
+    {{- $authorStr := .authorStr }}
+
+    {{- $year := "" }}
+    {{- with $data.date }}
+        {{- $parts := split . "-" }}
+        {{- if gt (len $parts) 0 }}
+            {{- $year = index $parts 0 }}
+        {{- end }}
+    {{- end }}
+
+    {{- $title := $data.title | markdownify | plainify }}
+    {{- $journal := $data.publicationTitle }}
+    {{- $volume := $data.volume }}
+    {{- $issue := $data.issue }}
+    {{- $pages := $data.pages }}
+    {{- $doi := $data.DOI }}
+
+    {{- $citationText := printf "%s (%s). %s. <i>%s</i>, <i>%s</i>(%s), %s. https://doi.org/%s"
+        $authorStr $year $title
+        $journal $volume $issue $pages $doi }}
+    
+    <p class="apa-citation">{{ $citation | safeHTML }}</p>
 {{- end }}
