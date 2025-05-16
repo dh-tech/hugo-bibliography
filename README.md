@@ -46,7 +46,13 @@ Then add the theme in your hugo.toml file.
 
 ## Configuration
 
-Hugo-Bibliography comes with shell scripts to fetch bibliography data from common sources, namely Zotero. You can use the fetch-zotero.sh file in your hugo project through the following:
+Hugo-Bibliography comes with shell scripts to fetch bibliography data from common sources, namely Zotero. 
+
+To use the fetch-zotero.sh script in your hugo project, first configure the Group_ID.
+
+In fetch-zotero.sh, change the `GROUP_ID` variable to your group id.
+
+Next, configure the script based on the following use cases.
 
 ### Running Hugo Locally:
 
