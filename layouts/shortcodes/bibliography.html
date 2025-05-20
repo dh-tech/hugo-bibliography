@@ -74,9 +74,9 @@
     {{- $pages := $data.pages }}
     {{- $doi := $data.DOI }}
 
-    {{- $citationText := printf "%s (%s). %s. <i>%s</i>, <i>%s</i>(%s), %s. <a href="https://doi.org/%s">https://doi.org/%s</a>"
+    {{- $citationText := printf "%s (%s). %s. <i>%s</i>, <i>%s</i>(%s), %s. <a href='https://doi.org/%s'>https://doi.org/%s</a>"
         $authorStr $year $title
         $journal $volume $issue $pages $doi $doi }}
     
-    <p class="apa-citation">{{ $citation | safeHTML }}</p>
+    <p class="apa-citation">{{ $citationText | safeHTML }}</p>
 {{- end }}
