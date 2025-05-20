@@ -55,6 +55,8 @@
 {{- end }}
 {{- $sortedCitations := sort $citations "authorStr" -}}
 
+{{- $metaTags := slice }}
+
 {{- range $sortedCitations }}
     {{- $data := .citation }}
     {{- $authorStr := .authorStr }}
@@ -74,9 +76,25 @@
     {{- $pages := $data.pages }}
     {{- $doi := $data.DOI }}
 
+    {{/* Build HTML meta tags */}}
+    {{- $entryMeta := slice
+        (printf `<meta name="citation_title" content="%s">` $title)
+        (printf `<meta name="citation_journal_title" content="%s">` $journal)
+        (printf `<meta name="citation_volume" content="%s">` $volume)
+        (printf `<meta name="citation_issue" content="%s">` $issue)
+        (printf `<meta name="citation_firstpage" content="%s">` (index (split $pages "-") 0))
+        (printf `<meta name="citation_lastpage" content="%s">` (index (split $pages "-") 1))
+        (printf `<meta name="citation_publication_date" content="%s">` $year)
+        (printf `<meta name="citation_doi" content="%s">` $doi)
+    }}
+
+    {{- $metaTags = $metaTags | append $entryMeta }}
+
     {{- $citationText := printf "%s (%s). %s. <i>%s</i>, <i>%s</i>(%s), %s. <a href="https://doi.org/%s">https://doi.org/%s</a>"
         $authorStr $year $title
         $journal $volume $issue $pages $doi $doi }}
     
     <p class="apa-citation">{{ $citation | safeHTML }}</p>
 {{- end }}
+
+{{- .Page.Scratch.Set "citation_meta_tags" $metaTags }}
