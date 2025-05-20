@@ -64,9 +64,9 @@
             {{- $pages := $entry.pages }}
             {{- $doi := $entry.DOI }}
 
-            {{- $citation := printf "%s (%s). %s. <i>%s</i>, <i>%s</i>(%s), %s. https://doi.org/%s"
+            {{- $citation := printf "%s (%s). %s. <i>%s</i>, <i>%s</i>(%s), %s. <a href=https://doi.org/%s>https://doi.org/%s</a>"
                 $authorStr $year $title
-                $journal $volume $issue $pages $doi }}
+                $journal $volume $issue $pages $doi $doi }}
 
             {{ $citation | safeHTML }}
         </p>
