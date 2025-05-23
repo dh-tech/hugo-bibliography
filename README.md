@@ -14,17 +14,19 @@ To add a full bibliography, call the bibliography shortcode with the following:
 
 You can add a parameter to limit the scope of the bibliography.
 
-`{{<bibliography key="journalArticle">}}`
+`{{<bibliography itemType="journalArticle">}}`
 
-The above shortcode will now only render entries of the bibliography that includes the keyword "journalArticle."
+The above shortcode will now only render entries of the bibliography that includes a key of "itemType" with the corresponding value of "journalArticle."
 
 An in-text citation can be generated using the cite shortcode and a specific title.
 
 #### Cite
 
+To add an in-text citation, use the cite shortcode and specify the title of the work you want to cite. 
+
 `{{<cite title="Title Of Work">}}`
 
-Finally, you can generate a bibliography of only the works that have been cited on a given page.
+Finally, you can generate a bibliography of only the works that have been cited on a given page using the following:
 
 `{{<bibliography cited="true">}}`
 
@@ -33,6 +35,10 @@ Finally, you can generate a bibliography of only the works that have been cited 
 fetch-zotero is a script that comes with hugo-bibliography. It allows you to fetch bibliography data from a Zotero group prior to your hugo build. This ensures your bibliography data stays up to date with activity in your zotero group.
 
 For more information on using this script in your project, see Configuration.
+
+#### Zotero detection
+
+By default, hugo-bibliography includes COinS data to its bibliography shortcode. If you're using Zotero Connector, you should be able to save any and all of the bibliography citations into Zotero.
 
 ## Installation
 
