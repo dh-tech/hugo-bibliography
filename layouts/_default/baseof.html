@@ -2,6 +2,11 @@
 <html lang="{{ or site.Language.LanguageCode }}" dir="{{ or site.Language.LanguageDirection `ltr` }}">
 <head>
   {{ partial "head.html" . }}
+  {{ with .Scratch.Get "citation_meta_tags" }}
+  {{ range . }}
+    {{ . | safeHTML }}
+  {{ end }}
+{{ end }}
 </head>
 <body>
   <header>

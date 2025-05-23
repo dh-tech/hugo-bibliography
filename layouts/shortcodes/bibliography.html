@@ -55,6 +55,8 @@
 {{- end }}
 {{- $sortedCitations := sort $citations "authorStr" -}}
 
+<ul class="apa-citation-list">
+
 {{- range $sortedCitations }}
     {{- $data := .citation }}
     {{- $authorStr := .authorStr }}
@@ -66,17 +68,28 @@
             {{- $year = index $parts 0 }}
         {{- end }}
     {{- end }}
-
+    
     {{- $title := $data.title | markdownify | plainify }}
     {{- $journal := $data.publicationTitle }}
     {{- $volume := $data.volume }}
     {{- $issue := $data.issue }}
     {{- $pages := $data.pages }}
     {{- $doi := $data.DOI }}
-
-    {{- $citationText := printf "%s (%s). %s. <i>%s</i>, <i>%s</i>(%s), %s. <a href='https://doi.org/%s'>https://doi.org/%s</a>"
-        $authorStr $year $title
-        $journal $volume $issue $pages $doi $doi }}
     
-    <p class="apa-citation">{{ $citationText | safeHTML }}</p>
-{{- end }}
+    
+    <li class="apa-citation">
+        <span class="citation-author">{{ $authorStr }}</span>
+        <span class="citation-year">({{ $year }}).</span>
+        <span class="citation-title">{{ $title }}</span>.
+        <span class="citation-journal"><i>{{ $journal }}</i></span>,
+        <span class="citation-volume"><i>{{ $volume }}</i></span>
+        <span class="citation-issue">({{ $issue }})</span>,
+        <span class="citation-pages">{{ $pages }}</span>.
+        <a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>
+
+        <span class="Z3988" title="ctx_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.atitle={{ urlquery $title }}&rft.jtitle={{ urlquery $journal }}&rft.date={{ $year }}&rft.au={{ urlquery $authorStr }}&rft.volume={{ $volume }}&rft.issue={{ $issue }}&rft.spage={{ index (split $pages "-") 0 }}&rft.epage={{ index (split $pages "-") 1 }}&rft_id=info:doi/{{ $doi }}">
+        </span>
+
+    </li>
+    {{- end }}
+</ul>
