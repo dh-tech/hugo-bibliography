@@ -1,7 +1,8 @@
 cff-version: 1.0
 message: "If you use this software, please cite it as below."
 authors:
-  - name: "Tatsat Jha" 
+  - family-names: "Jha" 
+    given-names: "Tatsat"
   - name: "DHTech"
 title: "Hugo-Bibliography"
 version: 1.0.0
