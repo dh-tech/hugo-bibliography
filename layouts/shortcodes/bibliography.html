@@ -55,7 +55,7 @@
 {{- end }}
 {{- $sortedCitations := sort $citations "authorStr" -}}
 
-<ul class="apa-citation-list">
+<ul style="list-style-type: none;" class="apa-citation-list">
 
 {{- range $sortedCitations }}
     {{- $data := .citation }}
