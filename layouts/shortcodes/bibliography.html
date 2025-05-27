@@ -76,6 +76,7 @@
     {{- $pages := $data.pages }}
     {{- $doi := $data.DOI }}
     
+    {{- if and $title $authorStr }}
     
     <li class="apa-citation">
         <span class="citation-author">{{ $authorStr }}</span>
@@ -91,5 +92,6 @@
         </span>
 
     </li>
+    {{- end}}
     {{- end }}
 </ul>
