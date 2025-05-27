@@ -1,8 +1,8 @@
 cff-version: 1.0
 message: "If you use this software, please cite it as below."
 authors:
-  - "Tatsat Jha" 
-  - "DHTech"
+  - name: "Tatsat Jha" 
+  - name: "DHTech"
 title: "Hugo-Bibliography"
 version: 1.0.0
 date-released: 2025-05-20
