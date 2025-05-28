@@ -2,6 +2,27 @@
 
 Hugo Bibliography is a Hugo Module designed to help you fetch and format bibliography data. This module comes with scripts and shortcodes you can seamlessly integrate into your project to quickly add an in-text citation or Bibliography page to your static site. 
 
+## Adding a Bibliography
+
+Hugo-Bibliography takes bibliography data located in your hugo project's /data/bibliography.json file and generates the in-text citation or bibliography based on this data. This data should be in the CSL-JSON format and there are a few ways to populate this file.
+
+If you use Zotero and already have bibliography data in an existing Zotero group, see the Configuration section on how to configure the fetch-zotero script to automatically populate your bibliography.json file.
+
+If you would like to populate your bibliography.json file manually here's the format you should follow:
+
+- In your bibliography.json file, create a list using square brackets []
+- Inside of these square brackets, add entries of JSON data for each citation you would like to make.
+- The recommended attributes for each JSON entry (i.e. what hugo-bibliography looks for) includes the following
+    - key
+    - title
+    - list of creators
+    - publicationTitle (the journal in which it was published if applicable)
+    - volume
+    - issue
+    - pages
+    - date
+    - doi
+
 ## Features
 
 All of the shortcodes rely on CSL-JSON data in /data/bibliography.json
@@ -94,3 +115,10 @@ If you're deploying your Hugo Site through Github Pages, add in the following co
       - name: Run Zotero fetch script
         run: ../../themes/hugo-bibliography/fetch-zotero.sh
 `
+
+## Customization
+
+Hugo-Bibliography can be customized in a few ways. The styling for the bibliography shortcode is contained within the bibliography shortcode's html file or /themes/hugo-bibliography/layouts/shortcodes/bibliography.html.
+
+You will notice the styling used for the apa-citation is contained at the top of the file. If you would like to change the bibliography's style (eg. type-face, font-size, padding) you can add your own style rules here. Note that the italics is done through i tags instead of style rules.
+
