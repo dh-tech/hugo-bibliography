@@ -11,12 +11,12 @@
 {{- $context := . }}
 {{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
 {{- $citedTitles := $context.Page.Scratch.Get "cited_titles" | default (slice) }}
-
 {{- $hasFilters := and $context.IsNamedParams (gt (len $context.Params) 0) }}
 
 {{- range $entry := site.Data.bibliography }}
-    {{- $include := true }}
 
+    <!-- determines if entry should be filtered -->
+    {{- $include := true }}
     {{- if $hasFilters }}
         {{- range $key, $val := $context.Params }}
             {{- if ne $key "cited" }}
@@ -28,8 +28,7 @@
         {{- end }}
     {{- end }}
 
-    {{ warnf "entry title: %s include: %v" $entry.title $include }}
-
+    <!-- adds entry to citations if it should be included based on filters and in-text citations -->
     {{- if and $include (or (not $onlyCited) (in $citedTitles $entry.title)) }}
             {{- $authors := slice }}
             {{- range $entry.creators }}
@@ -51,45 +50,25 @@
             {{- end }}
             {{- $citation := dict "authorStr" $authorStr "citation" $entry -}}
             {{- $citations = $citations | append $citation }}
-    {{- end }}
+    {{- end }}    
 {{- end }}
-{{- $sortedCitations := sort $citations "authorStr" -}}
 
-<ul class="apa-citation-list">
+{{$sortedCitations := sort $citations "authorStr" }}
+{{$collections := site.Data.collections }}
 
-{{- range $sortedCitations }}
-    {{- $data := .citation }}
-    {{- $authorStr := .authorStr }}
-
-    {{- $year := "" }}
-    {{- with $data.date }}
-        {{- $parts := split . "-" }}
-        {{- if gt (len $parts) 0 }}
-            {{- $year = index $parts 0 }}
+<ul style="list-style-type: none;" class="apa-citation-list">
+    {{- range $citation := $sortedCitations }}
+        {{- $collections := $citation.citation.collections | default (slice) }}
+        {{if eq (len $collections) 0 }}
+            {{- partial "render-citation.html" . }}
         {{- end }}
-    {{- end }}
-    
-    {{- $title := $data.title | markdownify | plainify }}
-    {{- $journal := $data.publicationTitle }}
-    {{- $volume := $data.volume }}
-    {{- $issue := $data.issue }}
-    {{- $pages := $data.pages }}
-    {{- $doi := $data.DOI }}
-    
-    
-    <li class="apa-citation">
-        <span class="citation-author">{{ $authorStr }}</span>
-        <span class="citation-year">({{ $year }}).</span>
-        <span class="citation-title">{{ $title }}</span>.
-        <span class="citation-journal"><i>{{ $journal }}</i></span>,
-        <span class="citation-volume"><i>{{ $volume }}</i></span>
-        <span class="citation-issue">({{ $issue }})</span>,
-        <span class="citation-pages">{{ $pages }}</span>.
-        <a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>
-
-        <span class="Z3988" title="ctx_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.atitle={{ urlquery $title }}&rft.jtitle={{ urlquery $journal }}&rft.date={{ $year }}&rft.au={{ urlquery $authorStr }}&rft.volume={{ $volume }}&rft.issue={{ $issue }}&rft.spage={{ index (split $pages "-") 0 }}&rft.epage={{ index (split $pages "-") 1 }}&rft_id=info:doi/{{ $doi }}">
-        </span>
-
-    </li>
-    {{- end }}
+    {{- end }} 
+    {{- range $collection := $collections }}
+        <h2>{{ $collection.name }}</h2>
+        {{- range $citation := $sortedCitations }}
+            {{- if in $citation.citation.collections $collection.key }}
+                {{- partial "render-citation.html" . }}
+            {{- end }}
+        {{- end }}
+    {{- end}}
 </ul>
