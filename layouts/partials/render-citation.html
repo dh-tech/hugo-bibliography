@@ -1,0 +1,30 @@
+{{- $data := .citation }}
+{{- $authorStr := .authorStr }}
+
+{{- $year := "" }}
+{{- with $data.date }}
+  {{- $parts := split . "-" }}
+  {{- if gt (len $parts) 0 }}
+    {{- $year = index $parts 0 }}
+  {{- end }}
+{{- end }}
+
+{{- $title := $data.title | markdownify | plainify }}
+{{- $journal := $data.publicationTitle }}
+{{- $volume := $data.volume }}
+{{- $issue := $data.issue }}
+{{- $pages := $data.pages }}
+{{- $doi := $data.DOI }}
+
+{{- if and $title $authorStr }}
+  <li class="apa-citation">
+    {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ end }}
+    {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
+    {{ if $title }}<span class="citation-title">{{ $title }}</span>.{{ end }}
+    {{ if $journal }}<span class="citation-journal"><i>{{ $journal }}</i></span>,{{ end }}
+    {{ if $volume }}<span class="citation-volume"><i>{{ $volume }}</i></span>{{ end }}
+    {{ if $issue }}<span class="citation-issue">({{ $issue }})</span>,{{ end }}
+    {{ if $pages }}<span class="citation-pages">{{ $pages }}</span>.{{ end }}
+    {{ if $doi }}<a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>{{ end }}
+  </li>
+{{- end }}
