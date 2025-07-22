@@ -2,12 +2,11 @@
 {{ $allCitations := .citations }}
 {{ $thisKey := $collection.key }}
 
-<li>
   <h2>{{ $collection.name }}</h2>
 
     {{ range $citation := $allCitations }}
-        {{ $colKeys := $citation.citation.collections | default (slice) }}
-        {{ if in $colKeys $thisKey }}
+        {{ $collectionKeys := $citation.citation.collections | default (slice) }}
+        {{ if in $collectionKeys $thisKey }}
             {{ partial "render-citation.html" $citation }}
         {{ end }}
     {{ end }}
@@ -18,4 +17,3 @@
         {{ partial "render-collection.html" (dict "collection" . "citations" $allCitations) }}
       {{ end }}
   {{ end }}
-</li>

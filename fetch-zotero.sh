@@ -48,18 +48,18 @@ python3 <<EOF
 import json
 
 with open("data/collections-flat.json") as f:
-    flat = json.load(f)
+    collections = json.load(f)
 
-coll_map = {c["key"]: {**c, "children": []} for c in flat}
+collection_map = {collection["key"]: {**collection, "children": []} for collection in collections}
 roots = []
 
-for c in flat:
-    if c.get("parentCollection"):
-        parent = coll_map.get(c["parentCollection"])
+for collection in collections:
+    if collection.get("parentCollection"):
+        parent = collection_map.get(collection["parentCollection"])
         if parent:
-            parent["children"].append(coll_map[c["key"]])
+            parent["children"].append(collection_map[collection["key"]])
     else:
-        roots.append(coll_map[c["key"]])
+        roots.append(collection_map[collection["key"]])
 
 with open("data/collections.json", "w") as f:
     json.dump(roots, f, indent=2)
