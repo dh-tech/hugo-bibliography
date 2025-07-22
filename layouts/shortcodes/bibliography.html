@@ -59,16 +59,12 @@
 <ul style="list-style-type: none;" class="apa-citation-list">
     {{- range $citation := $sortedCitations }}
         {{- $collections := $citation.citation.collections | default (slice) }}
-        {{if eq (len $collections) 0 }}
+        {{- if eq (len $collections) 0 }}
             {{- partial "render-citation.html" . }}
         {{- end }}
     {{- end }} 
-    {{- range $collection := $collections }}
-        <h2>{{ $collection.name }}</h2>
-        {{- range $citation := $sortedCitations }}
-            {{- if in $citation.citation.collections $collection.key }}
-                {{- partial "render-citation.html" . }}
-            {{- end }}
-        {{- end }}
-    {{- end}}
+
+    {{- range $collections }}
+        {{ partial "render-collection.html" (dict "collection" . "citations" $sortedCitations) }}
+    {{- end }}
 </ul>
