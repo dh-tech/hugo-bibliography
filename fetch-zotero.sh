@@ -1,7 +1,7 @@
 #!/bin/sh
 
 BIB_FILE="data/bibliography.json"
-COLLECTION_FILE="data/collections.json"
+COLLECTION_FILE="data/collections-flat.json"
 GROUP_ID="5010351"
 LIMIT=25
 START_INDEX=0
@@ -43,3 +43,24 @@ while [ "$START_INDEX" -lt "$TOTAL_RESULTS" ]; do
 done
 
 rm -f tmp_collections.json
+
+python3 <<EOF
+import json
+
+with open("data/collections-flat.json") as f:
+    collections = json.load(f)
+
+collection_map = {collection["key"]: {**collection, "children": []} for collection in collections}
+roots = []
+
+for collection in collections:
+    if collection.get("parentCollection"):
+        parent = collection_map.get(collection["parentCollection"])
+        if parent:
+            parent["children"].append(collection_map[collection["key"]])
+    else:
+        roots.append(collection_map[collection["key"]])
+
+with open("data/collections.json", "w") as f:
+    json.dump(roots, f, indent=2)
+EOF
