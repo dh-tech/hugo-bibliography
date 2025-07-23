@@ -55,6 +55,10 @@ Finally, you can generate a bibliography of only the works that have been cited 
 
 fetch-zotero is a script that comes with hugo-bibliography. It allows you to fetch bibliography data from a Zotero group prior to your hugo build. This ensures your bibliography data stays up to date with activity in your zotero group.
 
+As part of fetch-zotero, the script also fetches data about the collections in your Zotero group. This allows the bibliography shortcode to display the collections that a given work is in as well as display any and all subcollections.
+
+This collections data will be stored directly in a /data/collections-flat.json file. This file will then be processed into more of a tree structure and stored in /data/collections.json which is used by the bibliography shortcode.
+
 For more information on using this script in your project, see Configuration.
 
 #### Zotero detection
