@@ -26,5 +26,7 @@
     {{ if $issue }}<span class="citation-issue">({{ $issue }})</span>,{{ end }}
     {{ if $pages }}<span class="citation-pages">{{ $pages }}</span>.{{ end }}
     {{ if $doi }}<a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>{{ end }}
+    <span class="Z3988" title="ctx_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.atitle={{ urlquery $title }}&rft.jtitle={{ urlquery $journal }}&rft.date={{ $year }}&rft.au={{ urlquery $authorStr }}&rft.volume={{ $volume }}&rft.issue={{ $issue }}&rft.spage={{ index (split $pages "-") 0 }}&rft.epage={{ index (split $pages "-") 1 }}&rft_id=info:doi/{{ $doi }}">
+    </span>
   </li>
 {{- end }}
