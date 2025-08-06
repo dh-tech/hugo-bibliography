@@ -12,6 +12,10 @@
 {{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
 {{- $citedTitles := $context.Page.Scratch.Get "cited_titles" | default (slice) }}
 {{- $hasFilters := and $context.IsNamedParams (gt (len $context.Params) 0) }}
+{{- $authorParam := $context.Get "authorNum" | default "3" }}
+{{- $authorNum := int $authorParam }}
+
+{{ warnf "authorNum: %d" $authorNum }}
 
 {{- range $entry := site.Data.bibliography }}
 
@@ -19,7 +23,7 @@
     {{- $include := true }}
     {{- if $hasFilters }}
         {{- range $key, $val := $context.Params }}
-            {{- if ne $key "cited" }}
+            {{- if and (ne $key "cited") (ne $key "authorNum") }}
                 {{- $entryVal := index $entry $key }}
                 {{- if not (eq $entryVal $val) }}
                     {{- $include = false }}
@@ -45,8 +49,13 @@
             {{- end }}
 
             {{- $authorStr := delimit $authors ", " }}
-            {{- if ge (len $authors) 3 }}
-                {{- $authorStr = printf "%s et al." (index $authors 0) }}
+            {{- warnf "authorStr: %v" $authorStr }}
+            {{- $shownAuthors := first $authorNum $authors }}
+            {{- $authorList := delimit $shownAuthors ", " }}
+            {{- if ge (len $authors) $authorNum }}
+                {{- $authorStr = printf "%s et al." ($authorList) }}
+            {{ else }}
+                {{- $authorStr = $authorList }}
             {{- end }}
             {{- $citation := dict "authorStr" $authorStr "citation" $entry -}}
             {{- $citations = $citations | append $citation }}
