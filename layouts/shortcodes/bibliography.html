@@ -15,7 +15,6 @@
 {{- $authorParam := $context.Get "authorNum" | default "3" }}
 {{- $authorNum := int $authorParam }}
 
-{{ warnf "authorNum: %d" $authorNum }}
 
 {{- range $entry := site.Data.bibliography }}
 
@@ -49,7 +48,6 @@
             {{- end }}
 
             {{- $authorStr := delimit $authors ", " }}
-            {{- warnf "authorStr: %v" $authorStr }}
             {{- $shownAuthors := first $authorNum $authors }}
             {{- $authorList := delimit $shownAuthors ", " }}
             {{- if ge (len $authors) $authorNum }}
