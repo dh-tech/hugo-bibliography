@@ -79,9 +79,9 @@ Then add the theme in your hugo.toml file.
 
 Hugo-Bibliography comes with shell scripts to fetch bibliography data from common sources, namely Zotero. 
 
-To use the fetch-zotero.sh script in your hugo project, first configure the Group_ID.
+To use the fetch-zotero.sh script in your hugo project, configure your Zotero Group ID using the `ZOTERO_GROUP_ID` environment variable:
 
-In fetch-zotero.sh, change the `GROUP_ID` variable to your group id.
+`ZOTERO_GROUP_ID="your-group-id" ./themes/hugo-bibliography/fetch-zotero.sh`
 
 Next, configure the script based on the following use cases.
 
@@ -95,7 +95,7 @@ To use the fetch-zotero script when running the application locally, first make 
 
 If you have both of these dependencies installed, run the following to start hugo locally. The fetch script will run first and the hugo-build will include the appropriate data file.
 
-`./themes/hugo-bibliography/fetch-zotero.sh && hugo server`
+`ZOTERO_GROUP_ID="your-group-id" ./themes/hugo-bibliography/fetch-zotero.sh && hugo server`
 
 ### Running Hugo Locally through Docker:
 
@@ -106,7 +106,7 @@ If you're using a docker-compose file, the command should look like the followin
 `command: >
       sh -c "
         apk add --no-cache curl jq &&
-        ./themes/hugo-bibliography/fetch-zotero.sh &&
+        ZOTERO_GROUP_ID=\"your-group-id\" ./themes/hugo-bibliography/fetch-zotero.sh &&
         hugo server --bind 0.0.0.0 --port 1313
       "
 `
@@ -117,7 +117,7 @@ If you're deploying your Hugo Site through Github Pages, add in the following co
 `- name: Install jq for fetch script
         run: sudo apt-get update && sudo apt-get install -y jq
       - name: Run Zotero fetch script
-        run: ../../themes/hugo-bibliography/fetch-zotero.sh
+        run: ZOTERO_GROUP_ID="your-group-id" ../../themes/hugo-bibliography/fetch-zotero.sh
 `
 
 ## Customization
