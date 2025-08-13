@@ -2,7 +2,7 @@
 
 BIB_FILE="data/bibliography.json"
 COLLECTION_FILE="data/collections-flat.json"
-GROUP_ID="5010351"
+GROUP_ID="${ZOTERO_GROUP_ID:-5010351}"
 LIMIT=25
 START_INDEX=0
 
