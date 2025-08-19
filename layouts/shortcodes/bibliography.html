@@ -18,6 +18,7 @@
 
 {{- range $entry := site.Data.bibliography }}
 
+<!-- determines if entry should be incldued based on filters, checks if value is anywhere in the key -->
 {{- $include := true }}
 {{- if $hasFilters }}
   {{- range $key, $val := $context.Params }}
