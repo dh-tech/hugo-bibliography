@@ -18,18 +18,33 @@
 
 {{- range $entry := site.Data.bibliography }}
 
-    <!-- determines if entry should be filtered -->
-    {{- $include := true }}
-    {{- if $hasFilters }}
-        {{- range $key, $val := $context.Params }}
-            {{- if and (ne $key "cited") (ne $key "authorNum") }}
-                {{- $entryVal := index $entry $key }}
-                {{- if not (eq $entryVal $val) }}
-                    {{- $include = false }}
-                {{- end }}
-            {{- end }}
+{{- $include := true }}
+{{- if $hasFilters }}
+  {{- range $key, $val := $context.Params }}
+    {{- if and (ne $key "cited") (ne $key "authorNum") }}
+      {{- $entryVal := index $entry $key }}
+
+      {{- if reflect.IsSlice $entryVal }}
+        {{- $found := false }}
+        {{- range $entryVal }}
+          {{- $elem := printf "%v" . }}
+          {{- if in ($elem | lower) ($val | lower) }}
+            {{- $found = true }}
+          {{- end }}
         {{- end }}
+        {{- if not $found }}
+          {{- $include = false }}
+        {{- end }}
+      {{- else }}
+        {{- $strVal := printf "%v" $entryVal }}
+        {{- if not (in ($strVal | lower) ($val | lower)) }}
+          {{- $include = false }}
+        {{- end }}
+      {{- end }}
+
     {{- end }}
+  {{- end }}
+{{- end }}
 
     <!-- adds entry to citations if it should be included based on filters and in-text citations -->
     {{- if and $include (or (not $onlyCited) (in $citedTitles $entry.title)) }}

@@ -2,7 +2,17 @@
 {{ $allCitations := .citations }}
 {{ $thisKey := $collection.key }}
 
+{{ $renderCollection := false }}
+{{ range $citation := $allCitations }}
+    {{ $collectionKeys := $citation.citation.collections | default (slice) }}
+    {{ if in $collectionKeys $thisKey }}
+        {{ $renderCollection = true }}
+    {{ end }}
+{{ end }}
+
+{{ if $renderCollection }}
   <h2>{{ $collection.name }}</h2>
+{{ end }}
 
     {{ range $citation := $allCitations }}
         {{ $collectionKeys := $citation.citation.collections | default (slice) }}
