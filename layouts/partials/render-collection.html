@@ -1,6 +1,7 @@
 {{ $collection := .collection }}
 {{ $allCitations := .citations }}
 {{ $thisKey := $collection.key }}
+{{ $singleCollection := .singleCollection }}
 
 {{ $renderCollection := false }}
 {{ range $citation := $allCitations }}
@@ -10,7 +11,7 @@
     {{ end }}
 {{ end }}
 
-{{ if $renderCollection }}
+{{ if and $renderCollection (not $singleCollection) }}
   <h2>{{ $collection.name }}</h2>
 {{ end }}
 
