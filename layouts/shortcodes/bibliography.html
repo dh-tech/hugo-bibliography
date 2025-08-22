@@ -79,6 +79,18 @@
 {{$sortedCitations := sort $citations "authorStr" }}
 {{$collections := site.Data.collections }}
 
+
+{{- $singleCollection := false }}
+{{- if $hasFilters }}
+  {{- range $key, $val := $context.Params }}
+    {{- if eq $key "collections" }}
+      {{- $singleCollection = true }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+
+
 <ul style="list-style-type: none;" class="apa-citation-list">
     {{- range $citation := $sortedCitations }}
         {{- $collections := $citation.citation.collections | default (slice) }}
@@ -88,6 +100,6 @@
     {{- end }} 
 
     {{- range $collections }}
-        {{ partial "render-collection.html" (dict "collection" . "citations" $sortedCitations) }}
+        {{ partial "render-collection.html" (dict "collection" . "citations" $sortedCitations "singleCollection" $singleCollection) }}
     {{- end }}
 </ul>
