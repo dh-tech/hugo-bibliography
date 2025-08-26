@@ -51,7 +51,7 @@ Finally, you can generate a bibliography of only the works that have been cited 
 
 `{{<bibliography cited="true">}}`
 
-#### fetch-zotero.sh
+#### fetch-zotero
 
 fetch-zotero is a script that comes with hugo-bibliography. It allows you to fetch bibliography data from a Zotero group prior to your hugo build. This ensures your bibliography data stays up to date with activity in your zotero group.
 
@@ -79,9 +79,13 @@ Then add the theme in your hugo.toml file.
 
 Hugo-Bibliography comes with shell scripts to fetch bibliography data from common sources, namely Zotero. 
 
-To use the fetch-zotero.sh script in your hugo project, configure your Zotero Group ID using the `ZOTERO_GROUP_ID` environment variable:
+To use the fetch-zotero script in your hugo project, just provide it with the zotero group:
 
-`ZOTERO_GROUP_ID="your-group-id" ./themes/hugo-bibliography/fetch-zotero.sh`
+./themes/hugo-bibliography/fetch-zotero -g YOUR-GROUP-ID
+
+or provide it via  `ZOTERO_GROUP_ID` environment variable:
+
+ZOTERO_GROUP_ID="YOUR-GROUP-ID" ./themes/hugo-bibliography/fetch-zotero
 
 Next, configure the script based on the following use cases.
 
@@ -95,7 +99,7 @@ To use the fetch-zotero script when running the application locally, first make 
 
 If you have both of these dependencies installed, run the following to start hugo locally. The fetch script will run first and the hugo-build will include the appropriate data file.
 
-`ZOTERO_GROUP_ID="your-group-id" ./themes/hugo-bibliography/fetch-zotero.sh && hugo server`
+`ZOTERO_GROUP_ID="your-group-id" ./themes/hugo-bibliography/fetch-zotero && hugo server`
 
 ### Running Hugo Locally through Docker:
 
@@ -106,7 +110,7 @@ If you're using a docker-compose file, the command should look like the followin
 `command: >
       sh -c "
         apk add --no-cache curl jq &&
-        ZOTERO_GROUP_ID=\"your-group-id\" ./themes/hugo-bibliography/fetch-zotero.sh &&
+        ZOTERO_GROUP_ID=\"your-group-id\" ./themes/hugo-bibliography/fetch-zotero &&
         hugo server --bind 0.0.0.0 --port 1313
       "
 `
@@ -117,7 +121,7 @@ If you're deploying your Hugo Site through Github Pages, add in the following co
 `- name: Install jq for fetch script
         run: sudo apt-get update && sudo apt-get install -y jq
       - name: Run Zotero fetch script
-        run: ZOTERO_GROUP_ID="your-group-id" ../../themes/hugo-bibliography/fetch-zotero.sh
+        run: ZOTERO_GROUP_ID="your-group-id" ../../themes/hugo-bibliography/fetch-zotero
 `
 
 ## Customization

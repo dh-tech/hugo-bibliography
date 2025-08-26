@@ -1,0 +1,275 @@
+#!/usr/bin/env python3
+"""Fetch bibliography and collections data from Zotero API."""
+
+import argparse
+import json
+import logging
+import os
+import sys
+import urllib.request
+import urllib.parse
+from pathlib import Path
+from typing import Dict, List, Any, Optional
+
+
+def get_total_results(url: str) -> int:
+    """Get the total number of results from Zotero API headers."""
+    req = urllib.request.Request(url, method='HEAD')
+    with urllib.request.urlopen(req) as response:
+        total_results = response.headers.get('Total-Results')
+        if total_results:
+            return int(total_results)
+    return 0
+
+
+def fetch_zotero_data(group_id: str, endpoint: str, limit: int = 25) -> List[Dict[str, Any]]:
+    """Fetch all data from a Zotero API endpoint with pagination."""
+    base_url = f"https://api.zotero.org/groups/{group_id}/{endpoint}"
+    logger = logging.getLogger(__name__)
+
+    # Get total number of results
+    total_results = get_total_results(f"{base_url}?limit=1")
+
+    all_data = []
+    start_index = 0
+
+    while start_index < total_results:
+        # Build URL with proper query parameters
+        params = urllib.parse.urlencode({
+            'start': start_index,
+            'limit': limit,
+            'format': 'json'
+        })
+        url = f"{base_url}?{params}"
+
+        with urllib.request.urlopen(url) as response:
+            items = json.loads(response.read())
+            # Extract the .data field from each item
+            all_data.extend([item['data'] for item in items if 'data' in item])
+
+        start_index += limit
+
+    return all_data
+
+
+def build_collection_tree(flat_collections: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Build a hierarchical tree structure from flat collections."""
+    collection_map = {
+        collection["key"]: {**collection, "children": []}
+        for collection in flat_collections
+    }
+    roots = []
+
+    for collection in flat_collections:
+        if collection.get("parentCollection"):
+            parent = collection_map.get(collection["parentCollection"])
+            if parent:
+                parent["children"].append(collection_map[collection["key"]])
+        else:
+            roots.append(collection_map[collection["key"]])
+
+    return roots
+
+
+def fetch_zotero(group_id: str, output_dir: str = "data") -> None:
+    """
+    Fetch bibliography and collections from Zotero API.
+    
+    Args:
+        group_id: Zotero group ID
+        output_dir: Directory to save the output files
+    """
+    logger = logging.getLogger(__name__)
+
+    # Create output directory if it doesn't exist
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+    bib_file = Path(output_dir) / "bibliography.json"
+    collection_flat_file = Path(output_dir) / "collections-flat.json"
+    collection_file = Path(output_dir) / "collections.json"
+
+    logger.info(f"Fetching data from Zotero group {group_id}...")
+
+    # Fetch bibliography items
+    logger.info("Fetching bibliography items...")
+    bibliography = fetch_zotero_data(group_id, "items")
+    with open(bib_file, 'w', encoding='utf-8') as f:
+        json.dump(bibliography, f, indent=2, ensure_ascii=False)
+    logger.info(f"Saved {len(bibliography)} bibliography items to {bib_file}")
+
+    # Fetch collections
+    logger.info("Fetching collections...")
+    collections_flat = fetch_zotero_data(group_id, "collections")
+    with open(collection_flat_file, 'w', encoding='utf-8') as f:
+        json.dump(collections_flat, f, indent=2, ensure_ascii=False)
+    logger.info(f"Saved {len(collections_flat)} collections to {collection_flat_file}")
+
+    # Build collection tree
+    logger.info("Building collection tree...")
+    collection_tree = build_collection_tree(collections_flat)
+    with open(collection_file, 'w', encoding='utf-8') as f:
+        json.dump(collection_tree, f, indent=2, ensure_ascii=False)
+    logger.info(f"Saved collection tree to {collection_file}")
+
+
+def main():
+    """Command-line interface for fetch_zotero."""
+    parser = argparse.ArgumentParser(
+        description='Fetch bibliography and collections from Zotero API'
+    )
+    parser.add_argument(
+        '-g', '--group-id',
+        help='Zotero group ID',
+        default=os.environ.get('ZOTERO_GROUP_ID', '5010351')
+    )
+    parser.add_argument(
+        '-o', '--output-dir',
+        help='Directory to save output files (default: data)',
+        default='data'
+    )
+
+    args = parser.parse_args()
+
+    # Set up logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(message)s'
+    )
+
+    try:
+        fetch_zotero(
+            group_id=args.group_id,
+            output_dir=args.output_dir
+        )
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        sys.exit(1)
+
+
+#
+# Some rudimentary tests
+#
+
+import unittest
+import tempfile
+import shutil
+from unittest.mock import patch, MagicMock
+
+
+class TestFetchZotero(unittest.TestCase):
+    """Tests for fetch_zotero functionality."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.test_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        """Clean up test fixtures."""
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_build_collection_tree(self):
+        """Test building hierarchical collection tree from flat structure."""
+        flat_collections = [
+            {"key": "parent1", "name": "Parent 1", "parentCollection": False},
+            {"key": "child1", "name": "Child 1", "parentCollection": "parent1"},
+            {"key": "child2", "name": "Child 2", "parentCollection": "parent1"},
+            {"key": "parent2", "name": "Parent 2", "parentCollection": False},
+        ]
+
+        tree = build_collection_tree(flat_collections)
+
+        self.assertEqual(len(tree), 2)  # Two root collections
+        self.assertEqual(tree[0]["key"], "parent1")
+        self.assertEqual(len(tree[0]["children"]), 2)  # Parent1 has 2 children
+        self.assertEqual(tree[1]["key"], "parent2")
+        self.assertEqual(len(tree[1]["children"]), 0)  # Parent2 has no children
+
+    @patch('urllib.request.urlopen')
+    def test_fetch_zotero_data_with_pagination_and_unicode(self, mock_urlopen):
+        """Test fetching data with pagination and Unicode characters."""
+        # Mock responses for HEAD request (total count)
+        head_response = MagicMock()
+        head_response.headers = {'Total-Results': '3'}
+        head_response.__enter__ = lambda self: head_response
+        head_response.__exit__ = lambda self, *args: None
+
+        # Mock responses for data requests with Unicode characters
+        data_response = MagicMock()
+        data_response.read.return_value = json.dumps([
+            {"data": {"key": "item1", "title": "Trusting Others to 'Do the Math'"}},
+            {"data": {"key": "item2", "title": "Leptazolines A\u2013D, \u201cWilloughby\u2013Hoye\u201d Scripts"}},
+            {"data": {"key": "item3", "title": "Français résumé\u2014with em-dash", "note": "日本語"}},
+        ]).encode('utf-8')
+        data_response.__enter__ = lambda self: data_response
+        data_response.__exit__ = lambda self, *args: None
+
+        mock_urlopen.side_effect = [head_response, data_response]
+
+        result = fetch_zotero_data("12345", "items", limit=25)
+
+        self.assertEqual(len(result), 3)
+        self.assertEqual(result[0]["title"], "Trusting Others to 'Do the Math'")
+        self.assertIn("\u2013", result[1]["title"])  # en-dash
+        self.assertIn("\u201c", result[1]["title"])  # curly quotes
+        self.assertIn("\u2014", result[2]["title"])  # em-dash
+        self.assertEqual(result[2]["note"], "日本語")
+
+    @patch('__main__.fetch_zotero_data')
+    def test_fetch_zotero_creates_files_with_unicode(self, mock_fetch):
+        """Test that fetch_zotero creates files and handles Unicode correctly."""
+        # Mock data with Unicode characters
+        mock_items = [
+            {"key": "ITEM1", "title": "Trusting Others to 'Do the Math'", "itemType": "journalArticle"},
+            {"key": "ITEM2", "title": "Leptazolines A\u2013D", "note": "Contains \u201cquotes\u201d", "itemType": "book"}
+        ]
+        mock_collections = [
+            {"key": "COLL1", "name": "Test Collection\u2014with em-dash", "parentCollection": False}
+        ]
+
+        mock_fetch.side_effect = [mock_items, mock_collections]
+
+        # Run fetch_zotero
+        fetch_zotero("12345", self.test_dir)
+
+        # Check files were created
+        bib_file = Path(self.test_dir) / "bibliography.json"
+        collections_flat_file = Path(self.test_dir) / "collections-flat.json"
+        collections_file = Path(self.test_dir) / "collections.json"
+
+        self.assertTrue(bib_file.exists())
+        self.assertTrue(collections_flat_file.exists())
+        self.assertTrue(collections_file.exists())
+
+        # Check content and Unicode preservation
+        with open(bib_file, 'r', encoding='utf-8') as f:
+            bibliography = json.load(f)
+            self.assertEqual(len(bibliography), 2)
+            self.assertEqual(bibliography[0]["key"], "ITEM1")
+            self.assertEqual(bibliography[0]["title"], "Trusting Others to 'Do the Math'")
+            self.assertIn("\u2013", bibliography[1]["title"])  # en-dash preserved
+            self.assertIn("\u201c", bibliography[1]["note"])  # curly quotes preserved
+
+        with open(collections_flat_file, 'r', encoding='utf-8') as f:
+            collections = json.load(f)
+            self.assertEqual(len(collections), 1)
+            self.assertEqual(collections[0]["name"], "Test Collection\u2014with em-dash")
+            self.assertIn("\u2014", collections[0]["name"])  # em-dash preserved
+
+        with open(collections_file, 'r', encoding='utf-8') as f:
+            collection_tree = json.load(f)
+            self.assertEqual(len(collection_tree), 1)
+            self.assertIn("children", collection_tree[0])
+            self.assertIn("\u2014", collection_tree[0]["name"])  # em-dash preserved in tree
+
+
+def run_tests():
+    """Run the test suite."""
+    unittest.main(argv=[''], exit=False, verbosity=2)
+
+
+if __name__ == '__main__':
+    # Check if we're running tests
+    if len(sys.argv) > 1 and sys.argv[1] == 'test':
+        run_tests()
+    else:
+        main()
