@@ -6,6 +6,17 @@
     }
 </style>
 
+{{ $remote := resources.GetRemote "https://api.zotero.org/groups/5010351/items?format=json" }}
+{{ $bibData := $remote | transform.Unmarshal }}
+
+{{ $remote := resources.GetRemote "https://api.zotero.org/groups/5010351/items?format=json" }}
+{{ with $remote }}
+  {{ $data := .Content | transform.Unmarshal }}
+  {{ range $data }}
+    <p>{{ .data.title }}</p>
+  {{ end }}
+{{ end }}
+
 {{- $citations := slice -}}
 
 {{- $context := . }}
@@ -16,7 +27,7 @@
 {{- $authorNum := int $authorParam }}
 
 
-{{- range $entry := site.Data.bibliography }}
+{{- range $entry := $bibData }}
 
 <!-- determines if entry should be included based on filters, checks if value is anywhere in the key -->
 {{- $include := true }}
