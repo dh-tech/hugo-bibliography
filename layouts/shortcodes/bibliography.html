@@ -20,7 +20,6 @@
   {{ $data := .Content | transform.Unmarshal }}
   {{ range $data }}
 {{ $entry := .data }}
-
 <!-- determines if entry should be included based on filters, checks if value is anywhere in the key -->
 {{- $include := true }}
 {{- if $hasFilters }}
@@ -51,7 +50,6 @@
 {{- end }}
     <!-- adds entry to citations if it should be included based on filters and in-text citations -->
     {{- if and $include (or (not $onlyCited) (in $citedTitles $entry.title)) }}
-
             {{- $authors := slice }}
             {{- range $entry.creators }}                
                 {{- if eq .creatorType "author" }}
@@ -76,14 +74,17 @@
             {{- end }}
             {{- $citation := dict "authorStr" $authorStr "citation" $entry -}}
             {{- $citations = $citations | append $citation }}
+
     {{- end }}    
   {{ end }}
 {{ end }}
 
-
 {{$sortedCitations := sort $citations "authorStr" }}
 {{$collections := site.Data.collections }}
 
+{{ $remote := resources.GetRemote "https://api.zotero.org/groups/5010351/collections?format=json" }}
+{{ with $remote }}
+  {{ $collections := .Content | transform.Unmarshal }}
 
 {{- $singleCollection := false }}
 {{- if $hasFilters }}
@@ -98,7 +99,6 @@
 
 <ul style="list-style-type: none;" class="apa-citation-list">
     {{- range $citation := $sortedCitations }}
-        {{- partial "render-citation.html" . }}
         {{- $collections := $citation.citation.collections | default (slice) }}
         {{- if eq (len $collections) 0 }}
             {{- partial "render-citation.html" . }}
@@ -106,6 +106,7 @@
     {{- end }} 
 
     {{- range $collections }}
-        {{ partial "render-collection.html" (dict "collection" . "citations" $sortedCitations "singleCollection" $singleCollection) }}
+        {{ partial "render-collection.html" (dict "collection" .data "citations" $sortedCitations "singleCollection" $singleCollection) }}
     {{- end }}
 </ul>
+{{- end }}
