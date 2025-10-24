@@ -6,6 +6,8 @@
     }
 </style>
 
+{{ $groupId := site.Params.groupId }}
+
 {{- $citations := slice -}}
 
 {{- $context := . }}
@@ -15,11 +17,14 @@
 {{- $authorParam := $context.Get "authorNum" | default "3" }}
 {{- $authorNum := int $authorParam }}
 
-{{ $remote := resources.GetRemote "https://api.zotero.org/groups/5010351/items?format=json" }}
+{{ $endpoint := printf "https://api.zotero.org/groups/%d/items?start=0&limit=100&format=json" $groupId }}
+
+{{ $remote := resources.GetRemote $endpoint }}
 {{ with $remote }}
   {{ $data := .Content | transform.Unmarshal }}
   {{ range $data }}
 {{ $entry := .data }}
+
 <!-- determines if entry should be included based on filters, checks if value is anywhere in the key -->
 {{- $include := true }}
 {{- if $hasFilters }}
