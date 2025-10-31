@@ -19,21 +19,21 @@
 {{- $authorNum := int $authorParam }}
 
 {{ $groupId := site.Params.groupId }}
+{{ $scratch := newScratch }}
+{{ $scratch.Set "items" slice }}
+{{ $limit := 100 }}
 
-{{ $endpoint := printf "https://api.zotero.org/groups/%d/items?start=0&limit=100&format=json" $groupId }}
-{{ $remote1 := resources.GetRemote $endpoint | transform.Unmarshal }}
+{{ range seq 0 0 }}  <!-- up to 10 pages -->
+  {{ $start := mul . $limit }}
+  {{ $url := printf "https://api.zotero.org/groups/%d/items?start=%d&limit=%d&format=json" $groupId $start $limit }}
+  {{ $batch := resources.GetRemote $url | transform.Unmarshal }}
+  {{ if $batch }}
+    {{ $scratch.Add "items" $batch }}
+  {{ end }}
+{{ end }}
 
-{{ $endpoint := printf "https://api.zotero.org/groups/%d/items?start=100&limit=200&format=json" $groupId }}
-{{ $remote2 := resources.GetRemote $endpoint | transform.Unmarshal }}
-
-{{ $endpoint := printf "https://api.zotero.org/groups/%d/items?start=200&limit=300&format=json" $groupId }}
-{{ $remote3 := resources.GetRemote $endpoint | transform.Unmarshal }}
-
-{{ $remote := $remote1 | append $remote2 | append $remote3 }}
-
-{{ with $remote }}
-{{ $data := $remote }}
-
+{{ $data := $scratch.Get "items" }}
+j
 {{ range $data }}
 {{ $entry := .data }}
 
@@ -93,12 +93,10 @@
             {{- $citations = $citations | append $citation }}
     {{- end }}    
 {{ end }}
-{{ end }}
 
 {{$sortedCitations := sort $citations "authorStr" }}
-{{$collections := site.Data.collections }}
 
-{{ $endpoint := printf "https://api.zotero.org/groups/%d/collections?format=json" $groupId }}
+{{ $endpoint := printf "https://api.zotero.org/groups/%d/collections?/items?start=0&limit=100&format=json/format=json" $groupId }}
 
 {{ $remote := resources.GetRemote $endpoint }}
 {{ with $remote }}
