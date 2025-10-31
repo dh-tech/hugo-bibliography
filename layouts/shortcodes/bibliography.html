@@ -6,7 +6,8 @@
     }
 </style>
 
-{{ $groupId := site.Params.groupId }}
+
+{{/* fetch */}}
 
 {{- $citations := slice -}}
 
@@ -17,12 +18,23 @@
 {{- $authorParam := $context.Get "authorNum" | default "3" }}
 {{- $authorNum := int $authorParam }}
 
-{{ $endpoint := printf "https://api.zotero.org/groups/%d/items?start=0&limit=100&format=json" $groupId }}
+{{ $groupId := site.Params.groupId }}
 
-{{ $remote := resources.GetRemote $endpoint }}
+{{ $endpoint := printf "https://api.zotero.org/groups/%d/items?start=0&limit=100&format=json" $groupId }}
+{{ $remote1 := resources.GetRemote $endpoint | transform.Unmarshal }}
+
+{{ $endpoint := printf "https://api.zotero.org/groups/%d/items?start=100&limit=200&format=json" $groupId }}
+{{ $remote2 := resources.GetRemote $endpoint | transform.Unmarshal }}
+
+{{ $endpoint := printf "https://api.zotero.org/groups/%d/items?start=200&limit=300&format=json" $groupId }}
+{{ $remote3 := resources.GetRemote $endpoint | transform.Unmarshal }}
+
+{{ $remote := $remote1 | append $remote2 | append $remote3 }}
+
 {{ with $remote }}
-  {{ $data := .Content | transform.Unmarshal }}
-  {{ range $data }}
+{{ $data := $remote }}
+
+{{ range $data }}
 {{ $entry := .data }}
 
 <!-- determines if entry should be included based on filters, checks if value is anywhere in the key -->
@@ -79,39 +91,40 @@
             {{- end }}
             {{- $citation := dict "authorStr" $authorStr "citation" $entry -}}
             {{- $citations = $citations | append $citation }}
-
     {{- end }}    
-  {{ end }}
+{{ end }}
 {{ end }}
 
 {{$sortedCitations := sort $citations "authorStr" }}
 {{$collections := site.Data.collections }}
 
-{{ $remote := resources.GetRemote "https://api.zotero.org/groups/5010351/collections?format=json" }}
+{{ $endpoint := printf "https://api.zotero.org/groups/%d/collections?format=json" $groupId }}
+
+{{ $remote := resources.GetRemote $endpoint }}
 {{ with $remote }}
   {{ $collections := .Content | transform.Unmarshal }}
 
-{{- $singleCollection := false }}
-{{- if $hasFilters }}
-  {{- range $key, $val := $context.Params }}
-    {{- if eq $key "collections" }}
-      {{- $singleCollection = true }}
+  {{- $singleCollection := false }}
+  {{- if $hasFilters }}
+    {{- range $key, $val := $context.Params }}
+      {{- if eq $key "collections" }}
+        {{- $singleCollection = true }}
+      {{- end }}
     {{- end }}
   {{- end }}
-{{- end }}
 
 
 
-<ul style="list-style-type: none;" class="apa-citation-list">
-    {{- range $citation := $sortedCitations }}
+  <ul style="list-style-type: none;" class="apa-citation-list">
+      {{- range $citation := $sortedCitations }}
         {{- $collections := $citation.citation.collections | default (slice) }}
         {{- if eq (len $collections) 0 }}
-            {{- partial "render-citation.html" . }}
+          {{- partial "render-citation.html" . }}
         {{- end }}
-    {{- end }} 
+      {{- end }} 
 
-    {{- range $collections }}
+      {{- range $collections }}
         {{ partial "render-collection.html" (dict "collection" .data "citations" $sortedCitations "singleCollection" $singleCollection) }}
-    {{- end }}
-</ul>
+      {{- end }}
+  </ul>
 {{- end }}
