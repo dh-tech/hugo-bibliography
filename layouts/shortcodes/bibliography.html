@@ -98,11 +98,9 @@
 {{$sortedCitations := sort $citations "authorStr" }}
 
 {{ $endpoint := printf "https://api.zotero.org/groups/%d/collections?start=0&limit=100&format=json" $groupId }}
+{{ $remote := resources.GetRemote $endpoint | transform.Unmarshal }}
 
-{{ $remote := resources.GetRemote $endpoint }}
-{{ with $remote }}
-  {{ $collections := .Content | transform.Unmarshal }}
-
+{{ $collections := $remote }}
   {{- $singleCollection := false }}
   {{- if $hasFilters }}
     {{- range $key, $val := $context.Params }}
@@ -111,6 +109,36 @@
       {{- end }}
     {{- end }}
   {{- end }}
+
+{{/* Create mapy  */}}
+  {{ $collectionMap := dict }}
+  {{ range $collections }}
+    {{ $key := .data.key }}
+    {{ $obj := merge .data (dict "children" (slice)) }}
+    {{ $collectionMap = merge $collectionMap (dict $key $obj) }}
+  {{ end }}
+
+  {{/* Build parent-child relationships */}}
+  {{ $roots := slice }}
+  {{ range $collections }}
+    {{ $col := .data }}
+    {{ $key := $col.key }}
+    {{ $parentKey := $col.parentCollection }}
+
+    {{ if $parentKey }}
+      {{ $parent := index $collectionMap $parentKey }}
+      {{ if $parent }}
+        {{ $childList := $parent.children | append (index $collectionMap $key) }}
+        {{ $updatedParent := merge $parent (dict "children" $childList) }}
+        {{ $collectionMap = merge $collectionMap (dict $parentKey $updatedParent) }}
+      {{ end }}
+    {{ else }}
+      {{ $roots = $roots | append (index $collectionMap $key) }}
+    {{ end }}
+  {{ end }}
+
+  {{/* Display tree as formatted JSON for debugging */}}
+  <pre>{{ jsonify (dict "indent" "  ") $roots }}</pre>
 
 
 
@@ -126,4 +154,3 @@
         {{ partial "render-collection.html" (dict "collection" .data "citations" $sortedCitations "singleCollection" $singleCollection) }}
       {{- end }}
   </ul>
-{{- end }}
