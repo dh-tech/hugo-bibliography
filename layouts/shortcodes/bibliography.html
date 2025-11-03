@@ -23,7 +23,7 @@
 {{ $scratch.Set "items" slice }}
 {{ $limit := 100 }}
 
-{{ range seq 0 0 }}  <!-- up to 10 pages -->
+{{ range seq 0 9 }}  <!-- up to 10 pages -->
   {{ $start := mul . $limit }}
   {{ $url := printf "https://api.zotero.org/groups/%d/items?start=%d&limit=%d&format=json" $groupId $start $limit }}
   {{ $batch := resources.GetRemote $url | transform.Unmarshal }}
@@ -32,8 +32,9 @@
   {{ end }}
 {{ end }}
 
-{{ $data := $scratch.Get "items" }}
-j
+{{ $items := $scratch.Get "items" }}
+{{ $data := $items }}
+
 {{ range $data }}
 {{ $entry := .data }}
 
@@ -96,7 +97,7 @@ j
 
 {{$sortedCitations := sort $citations "authorStr" }}
 
-{{ $endpoint := printf "https://api.zotero.org/groups/%d/collections?/items?start=0&limit=100&format=json/format=json" $groupId }}
+{{ $endpoint := printf "https://api.zotero.org/groups/%d/collections?start=0&limit=100&format=json" $groupId }}
 
 {{ $remote := resources.GetRemote $endpoint }}
 {{ with $remote }}
