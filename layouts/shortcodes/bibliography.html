@@ -110,37 +110,63 @@
     {{- end }}
   {{- end }}
 
-{{/* Create mapy  */}}
-  {{ $collectionMap := dict }}
-  {{ range $collections }}
-    {{ $key := .data.key }}
-    {{ $obj := merge .data (dict "children" (slice)) }}
-    {{ $collectionMap = merge $collectionMap (dict $key $obj) }}
+
+{{/* Build collectionMap to easily look up collections by key */}}
+{{ $collectionMap := dict }}
+{{ range $collections }}
+  {{ $k := .data.key }}
+  {{ $obj := merge .data (dict "children" (slice)) }}
+  {{ $collectionMap = merge $collectionMap (dict $k $obj) }}
+{{ end }}
+
+{{/* Build childKeysMap (parentKey => [childKey,...]) */}}
+{{ $childKeysMap := dict }}
+{{ range $collections }}
+  {{ $childKey := .data.key }}
+  {{ $parentKey := .data.parentCollection }}
+
+  {{/*treat boolean false and "false" and "" and nil as no-parent */}}
+  {{ $hasParent := and $parentKey (ne $parentKey false) (ne $parentKey "false") (ne $parentKey "") }}
+
+  {{ if $hasParent }}
+    {{ $existing := index $childKeysMap $parentKey | default (slice) }}
+    {{ $existing = $existing | append $childKey }}
+    {{ $childKeysMap = merge $childKeysMap (dict $parentKey $existing) }}
   {{ end }}
+{{ end }}
 
-  {{/* Build parent-child relationships */}}
-  {{ $roots := slice }}
-  {{ range $collections }}
-    {{ $col := .data }}
-    {{ $key := $col.key }}
-    {{ $parentKey := $col.parentCollection }}
-
-    {{ if $parentKey }}
-      {{ $parent := index $collectionMap $parentKey }}
-      {{ if $parent }}
-        {{ $childList := $parent.children | append (index $collectionMap $key) }}
-        {{ $updatedParent := merge $parent (dict "children" $childList) }}
-        {{ $collectionMap = merge $collectionMap (dict $parentKey $updatedParent) }}
+{{/* Attach children to parents */}}
+{{ range $parentKey, $childKeySlice := $childKeysMap }}
+  {{ $parent := index $collectionMap $parentKey }}
+  {{ if $parent }}
+    {{ $currentChild := $parent.children | default (slice) }}
+    {{ range $childKeySlice }}
+      {{ $childObj := index $collectionMap . }}
+      {{ if $childObj }}
+        {{ $currentChild = $currentChild| append $childObj }}
       {{ end }}
-    {{ else }}
-      {{ $roots = $roots | append (index $collectionMap $key) }}
     {{ end }}
+    {{ $updatedParent := merge $parent (dict "children" $currentChild) }}
+    {{ $collectionMap = merge $collectionMap (dict $parentKey $updatedParent) }}
   {{ end }}
+{{ end }}
 
-  {{/* Display tree as formatted JSON for debugging */}}
-  <pre>{{ jsonify (dict "indent" "  ") $roots }}</pre>
+{{/* Compute roots array we can iterate over for rendering */}}
+{{ $roots := slice }}
+{{ range $k, $obj := $collectionMap }}
+  {{ $parentKey := $obj.parentCollection }}
+  {{ $hasParent := and $parentKey (ne $parentKey false) (ne $parentKey "false") (ne $parentKey "") }}
+  {{ if not $hasParent }}
+    {{ $roots = $roots | append $obj }}
+  {{ end }}
+{{ end }}
 
-
+{{/* Debug output */}}
+<p>total fetched collections: <strong>{{ len $collections }}</strong></p>
+<p>collectionMap size: <strong>{{ len ($collectionMap) }}</strong></p>
+<p>total roots computed: <strong>{{ len $roots }}</strong></p>
+{{ $sortedCollections := sort $roots "name" }}
+<pre>{{ jsonify (dict "indent" "  ") $sortedCollections }}</pre>
 
   <ul style="list-style-type: none;" class="apa-citation-list">
       {{- range $citation := $sortedCitations }}
@@ -150,7 +176,9 @@
         {{- end }}
       {{- end }} 
 
-      {{- range $collections }}
-        {{ partial "render-collection.html" (dict "collection" .data "citations" $sortedCitations "singleCollection" $singleCollection) }}
+      {{- range $sortedCollections }}
+        <p>Rendering collection: </p>
+        <pre>{{ jsonify (dict "indent" "  ") . }}</pre>
+        {{ partial "render-collection.html" (dict "collection" . "citations" $sortedCitations "singleCollection" $singleCollection) }}
       {{- end }}
   </ul>
