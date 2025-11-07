@@ -43,7 +43,7 @@ The above shortcode will now only render entries of the bibliography that includ
 
 The value does not have to be an exact match to the key so long as the value is a substring of the key.
 
-This filtering also works to sepcify specific colections or subcollections to generate a bibliography for.
+This filtering also works to specify specific collections or subcollections to generate a bibliography for.
 
 #### Cite
 
