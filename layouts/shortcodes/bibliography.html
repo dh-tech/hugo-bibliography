@@ -23,7 +23,12 @@
 {{ $scratch.Set "items" slice }}
 {{ $limit := 100 }}
 
-{{ range seq 0 9 }}  <!-- up to 10 pages -->
+{{ $url := printf "https://api.zotero.org/groups/%d/" $groupId }}
+{{ $resource := resources.GetRemote $url | transform.Unmarshal }}
+{{ $numItems := $resource.meta.numItems }}
+{{ $numPages := math.Ceil (div $numItems $limit) }}
+
+{{ range seq 0 $numPages }}
   {{ $start := mul . $limit }}
   {{ $url := printf "https://api.zotero.org/groups/%d/items?start=%d&limit=%d&format=json" $groupId $start $limit }}
   {{ $batch := resources.GetRemote $url | transform.Unmarshal }}
@@ -161,12 +166,7 @@
   {{ end }}
 {{ end }}
 
-{{/* Debug output */}}
-<p>total fetched collections: <strong>{{ len $collections }}</strong></p>
-<p>collectionMap size: <strong>{{ len ($collectionMap) }}</strong></p>
-<p>total roots computed: <strong>{{ len $roots }}</strong></p>
 {{ $sortedCollections := sort $roots "name" }}
-<pre>{{ jsonify (dict "indent" "  ") $sortedCollections }}</pre>
 
   <ul style="list-style-type: none;" class="apa-citation-list">
       {{- range $citation := $sortedCitations }}
@@ -177,8 +177,6 @@
       {{- end }} 
 
       {{- range $sortedCollections }}
-        <p>Rendering collection: </p>
-        <pre>{{ jsonify (dict "indent" "  ") . }}</pre>
         {{ partial "render-collection.html" (dict "collection" . "citations" $sortedCitations "singleCollection" $singleCollection) }}
       {{- end }}
   </ul>
