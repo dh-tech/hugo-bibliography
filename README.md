@@ -33,13 +33,17 @@ To add a full bibliography, call the bibliography shortcode with the following:
 
 `{{<bibliography>}}`
 
+#### Filtering
+
 You can add a parameter to limit the scope of the bibliography.
 
 `{{<bibliography itemType="journalArticle">}}`
 
 The above shortcode will now only render entries of the bibliography that includes a key of "itemType" with the corresponding value of "journalArticle."
 
-An in-text citation can be generated using the cite shortcode and a specific title.
+The value does not have to be an exact match to the key so long as the value is a substring of the key.
+
+This filtering also works to specify specific collections or subcollections to generate a bibliography for.
 
 #### Cite
 
