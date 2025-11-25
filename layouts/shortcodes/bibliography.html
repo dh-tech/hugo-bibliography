@@ -18,6 +18,7 @@
 {{- $authorParam := $context.Get "authorNum" | default "3" }}
 {{- $authorNum := int $authorParam }}
 
+
 {{ $groupId := site.Params.groupId }}
 {{ $scratch := newScratch }}
 {{ $scratch.Set "items" slice }}
@@ -51,6 +52,7 @@
 
         <!-- special keyword search through entire citation -->
        {{- if eq $key "keyword" }}
+        {{ $matches := index site.Taxonomies.keywords (lower $keyword) }}
         {{- $flat := "" }}
 
         {{/* flatten entire entry into one lowercase string */}}
