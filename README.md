@@ -37,6 +37,31 @@ The value does not have to be an exact match to the key so long as the value is 
 
 This filtering also works to specify specific collections or subcollections to generate a bibliography for.
 
+#### Taxonomy/Tags
+
+With the current version of hugo-bibliography, you can rig together a taxonomy by making markdown files which dsiplay the bibliography for a specific tag.
+
+`
+/content/bibliography/tag-1.md
+/content/bibliography/tag-2.md
+/content/bibliography/tag-3.md
+`
+
+Then, you can add a shortcode to your markdown files to display the bibliography for a specific tag.
+
+`
+---
+title: "Bibliography for Tag 1"
+tags: ["tag-1"]
+---
+
+  {{<bibliography keyword="tag-1">}}
+`
+
+Using the keyword parameter, you can filter the bibliography to only include entries that have a keyword that matches the tag.
+
+A solution to automatically generating tags for a bibliography without having to make every markdown file manually is in the works.
+
 #### Cite
 
 To add an in-text citation, use the cite shortcode and specify the title of the work you want to cite. 
