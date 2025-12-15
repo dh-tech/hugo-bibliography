@@ -46,14 +46,15 @@
 
 <!-- determines if entry should be included based on filters, checks if value is anywhere in the key -->
 {{- $include := true }}
+
 {{- if $hasFilters }}
   {{- range $key, $val := $context.Params }}
     {{- if and (ne $key "cited") (ne $key "authorNum") }}
 
         <!-- special keyword search through entire citation -->
+
+       {{ $tag := index $.Page.Params.tags 0 }}
        {{- if eq $key "keyword" }}
-        {{ $matches := index site.Taxonomies.keywords (lower $keyword) }}
-        {{- if eq $key "keyword" }}
         {{- $flat := "" }}
 
         {{/* flatten entire entry into one lowercase string */}}
@@ -71,7 +72,23 @@
           {{- $include = false }}
         {{- end }}
 
+      {{ else if $tag }}
+
+        {{- range $k, $v := $entry }}
+          {{- if reflect.IsSlice $v }}
+            {{- range $v }}
+              {{- $flat = printf "%s %v" $flat . }}
+            {{- end }}
+          {{- else }}
+            {{- $flat = printf "%s %v" $flat $v }}
+          {{- end }}
+        {{- end }}
+
+        {{- if not (in ($flat | lower) ($tag | lower)) }}
+          {{- $include = false }}
+        {{- end }}
       {{ else }}
+
 
       {{- $entryVal := index $entry $key }}
 
@@ -92,8 +109,6 @@
           {{- $include = false }}
         {{- end }}
       {{- end }}
-      {{- end }}
-
       {{- end }}
 
     {{- end }}
