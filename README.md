@@ -10,9 +10,9 @@ To fetch bibliography data from a Zotero group, you will need to configure your 
 
 Here is an example of how to configure your Zotero Group ID in a toml file:
 
-`
+```
 params = { groupId = 1196 }
-`
+```
 
 
 ## Features
@@ -39,7 +39,7 @@ This filtering also works to specify specific collections or subcollections to g
 
 #### Taxonomy/Tags
 
-With the current version of hugo-bibliography, you can rig together a taxonomy by making markdown files which dsiplay the bibliography for a specific tag.
+With the current version of hugo-bibliography, you can rig together a taxonomy by making markdown files that each dsiplay the bibliography for a specific tag.
 
 ```
 /content/bibliography/tag-1.md
@@ -52,7 +52,6 @@ Then, you can add a shortcode to your markdown files to display the bibliography
 ```
 ---
 title: "Bibliography for Tag 1"
-tags: ["tag-1"]
 ---
 
   {{<bibliography keyword="tag-1">}}
