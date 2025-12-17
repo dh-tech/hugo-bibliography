@@ -45,6 +45,12 @@ The value does not have to be an exact match to the key so long as the value is 
 
 This filtering also works to specify specific collections or subcollections to generate a bibliography for.
 
+If instead of filtering by a specific key-value pair, you would like to filter by a value that exists anywhere in an entry, you can use the following syntax:
+
+`{{<bibliography keyword="some keyword">}}`
+
+Now, the bibliography will only include entries that have the keyword "some keyword" in any of the values of the entry. This property is particularly useful for generating bibliographies for particular authors, editors or projects.
+
 #### Cite
 
 To add an in-text citation, use the cite shortcode and specify the title of the work you want to cite. 
