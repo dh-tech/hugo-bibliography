@@ -61,7 +61,6 @@ tags: ["tag-1"]
 Using the keyword parameter, you can filter the bibliography to only include entries that have a keyword that matches the tag.
 
 A solution to automatically generating tags for a bibliography without having to make every markdown file manually is in the works.
-=======
 If instead of filtering by a specific key-value pair, you would like to filter by a value that exists anywhere in an entry, you can use the following syntax:
 
 `{{<bibliography keyword="some keyword">}}`
