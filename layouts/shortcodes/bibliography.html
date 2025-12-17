@@ -18,6 +18,7 @@
 {{- $authorParam := $context.Get "authorNum" | default "3" }}
 {{- $authorNum := int $authorParam }}
 
+
 {{ $groupId := site.Params.groupId }}
 {{ $scratch := newScratch }}
 {{ $scratch.Set "items" slice }}
@@ -45,9 +46,33 @@
 
 <!-- determines if entry should be included based on filters, checks if value is anywhere in the key -->
 {{- $include := true }}
+
 {{- if $hasFilters }}
   {{- range $key, $val := $context.Params }}
     {{- if and (ne $key "cited") (ne $key "authorNum") }}
+
+        <!-- special keyword search through entire citation -->
+       {{- if eq $key "keyword" }}
+        {{- $flat := "" }}
+
+        {{/* flatten entire entry into one lowercase string */}}
+        {{- range $k, $v := $entry }}
+          {{- if reflect.IsSlice $v }}
+            {{- range $v }}
+              {{- $flat = printf "%s %v" $flat . }}
+            {{- end }}
+          {{- else }}
+            {{- $flat = printf "%s %v" $flat $v }}
+          {{- end }}
+        {{- end }}
+
+        {{- if not (in ($flat | lower) ($val | lower)) }}
+          {{- $include = false }}
+        {{- end }}
+
+      {{ else }}
+
+
       {{- $entryVal := index $entry $key }}
 
       {{- if reflect.IsSlice $entryVal }}
@@ -67,10 +92,12 @@
           {{- $include = false }}
         {{- end }}
       {{- end }}
+      {{- end }}
 
     {{- end }}
   {{- end }}
 {{- end }}
+
     <!-- adds entry to citations if it should be included based on filters and in-text citations -->
     {{- if and $include (or (not $onlyCited) (in $citedTitles $entry.title)) }}
             {{- $authors := slice }}
