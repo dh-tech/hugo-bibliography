@@ -15,7 +15,7 @@
 {{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
 {{- $citedTitles := $context.Page.Scratch.Get "cited_titles" | default (slice) }}
 {{- $hasFilters := and $context.IsNamedParams (gt (len $context.Params) 0) }}
-{{- $authorParam := $context.Get "authorNum" | default "5" }}
+{{- $authorParam := $context.Get "authorNum" | default "3" }}
 {{- $authorNum := int $authorParam }}
 
 
