@@ -41,22 +41,22 @@ This filtering also works to specify specific collections or subcollections to g
 
 With the current version of hugo-bibliography, you can rig together a taxonomy by making markdown files which dsiplay the bibliography for a specific tag.
 
-`
+```
 /content/bibliography/tag-1.md
 /content/bibliography/tag-2.md
 /content/bibliography/tag-3.md
-`
+```
 
 Then, you can add a shortcode to your markdown files to display the bibliography for a specific tag.
 
-`
+```
 ---
 title: "Bibliography for Tag 1"
 tags: ["tag-1"]
 ---
 
   {{<bibliography keyword="tag-1">}}
-`
+```
 
 Using the keyword parameter, you can filter the bibliography to only include entries that have a keyword that matches the tag.
 
