@@ -52,8 +52,6 @@
     {{- if and (ne $key "cited") (ne $key "authorNum") }}
 
         <!-- special keyword search through entire citation -->
-
-       {{ $tag := index $.Page.Params.tags 0 }}
        {{- if eq $key "keyword" }}
         {{- $flat := "" }}
 
@@ -72,21 +70,6 @@
           {{- $include = false }}
         {{- end }}
 
-      {{ else if $tag }}
-
-        {{- range $k, $v := $entry }}
-          {{- if reflect.IsSlice $v }}
-            {{- range $v }}
-              {{- $flat = printf "%s %v" $flat . }}
-            {{- end }}
-          {{- else }}
-            {{- $flat = printf "%s %v" $flat $v }}
-          {{- end }}
-        {{- end }}
-
-        {{- if not (in ($flat | lower) ($tag | lower)) }}
-          {{- $include = false }}
-        {{- end }}
       {{ else }}
 
 
