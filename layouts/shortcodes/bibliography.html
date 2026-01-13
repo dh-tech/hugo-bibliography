@@ -25,7 +25,11 @@
 {{ $limit := 100 }}
 
 {{ $url := printf "https://api.zotero.org/groups/%d/" $groupId }}
-{{ $resource := resources.GetRemote $url | transform.Unmarshal }}
+{{ $opts := dict
+  "headers" (dict "Accept" "application/json")
+}}
+
+{{ $resource := resources.GetRemote $url $opts | transform.Unmarshal }}
 {{ $numItems := $resource.meta.numItems }}
 {{ $numPages := math.Ceil (div $numItems $limit) }}
 
