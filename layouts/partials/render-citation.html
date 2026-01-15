@@ -15,8 +15,9 @@
 {{- $issue := $data.issue }}
 {{- $pages := $data.pages }}
 {{- $doi := $data.DOI }}
+{{- $itemType := $data.itemType }}
 
-{{- if and $title $authorStr }}
+{{- if not (eq $itemType "attachment")}}
   <li class="apa-citation">
     {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ end }}
     {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
