@@ -24,7 +24,7 @@
 {{- if not (eq $itemType "attachment")}}
     {{- if or (eq $itemType "webpage") (eq $itemType "encyclopediaArticle")}}
     <li class="apa-citation">
-        {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ end }}
+    {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ else }} <span class="citation-author">(no author)</span>{{ end }}
         {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
         {{ if $title }}<span class="citation-title">{{ $title }}</span>.{{ end }}
         {{ if $websiteTitle }}<span class="citation-website"><i>{{ $websiteTitle }}</i></span>.{{ end }}
@@ -36,7 +36,7 @@
     </li>
     {{- else}}
   <li class="apa-citation">
-    {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ end }}
+    {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ else }} <span class="citation-author">(no author)</span>{{ end }}
     {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
     {{ if $title }}<span class="citation-title">{{ $title }}</span>.{{ end }}
     {{ if $journal }}<span class="citation-journal"><i>{{ $journal }}</i></span>,{{ end }}
