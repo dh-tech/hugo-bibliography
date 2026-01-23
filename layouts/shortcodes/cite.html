@@ -2,7 +2,6 @@
 
 {{- $.Page.Scratch.Add "cited_titles" $title -}}
 
-
 {{ $groupId := site.Params.groupId }}
 {{ $endpoint := printf "https://api.zotero.org/groups/%d/items?start=0&limit=100&format=json" $groupId }}
 
@@ -11,6 +10,14 @@
 {{ $data := .Content | transform.Unmarshal }}
 {{- range $data }}
 {{$entry := .data}}
+
+{{- $year := "" }}
+{{- with $entry.date }}
+  {{- $parts := split . "-" }}
+  {{- if gt (len $parts) 0 }}
+    {{- $year = index $parts 0 }}
+  {{- end }}
+{{- end }}
 
 {{- if eq $entry.title $title }}
 <p>
@@ -39,7 +46,11 @@
     {{$authorStr = printf "%s et al." (index (split (index $authors 0) ",") 0 )}}
     {{- end}}
 
-    ({{$authorStr}}, {{ $entry.date }})
+    {{ if $authorStr }}
+({{$authorStr}}, {{if $year}}{{$year}}{{else}}n.d.{{end}})
+    {{ else }}
+({{$title}}, {{if $year}}{{$year}}{{else}}n.d.{{end}})
+    {{ end }}
 </p>
 {{- end}}
 {{- end}}
