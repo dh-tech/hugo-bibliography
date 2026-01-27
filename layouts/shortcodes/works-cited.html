@@ -13,13 +13,8 @@
 
 {{- $context := . }}
 {{- $onlyCited := "true" }}
-{{- $citedTitles := slice -}}
+{{- $citedTitles := .Site.Store.Get "cited_titles" | default (slice) -}}
 
-{{- range site.RegularPages -}}
-  {{- with .Scratch.Get "cited_titles" -}}
-    <p>Titles: {{.}}</p>
-  {{- end -}}
-{{- end -}}
 
 {{- $hasFilters := and $context.IsNamedParams (gt (len $context.Params) 0) }}
 {{- $authorParam := $context.Get "authorNum" | default "3" }}
