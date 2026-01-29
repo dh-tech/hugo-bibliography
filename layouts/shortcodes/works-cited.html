@@ -12,8 +12,14 @@
 {{- $citations := slice -}}
 
 {{- $context := . }}
-{{- $onlyCited := "true" }}
-{{- $citedTitles := .Site.Store.Get "cited_titles" | default (slice) -}}
+{{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
+
+{{- if $onlyCited }}
+  {{- $citedTitles := .Site.Store.Get "cited_titles" | default (slice) -}}
+{{- else }}
+  {{- $citedTitles := .Site.Store.Get "bib-record" | default (slice) -}}
+  {{ $onlyCited = true }}
+{{- end }}
 
 
 {{- $hasFilters := and $context.IsNamedParams (gt (len $context.Params) 0) }}
