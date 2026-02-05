@@ -1,0 +1,19 @@
+{{- $groupId := .groupId -}}
+{{- $limit := 100 -}}
+{{- $scratch := newScratch -}}
+{{- $scratch.Set "items" (slice) -}}
+
+{{- $metaURL := printf "https://api.zotero.org/groups/%d/" $groupId -}}
+{{- $meta := resources.GetRemote $metaURL | transform.Unmarshal -}}
+{{- $numPages := math.Ceil (div $meta.meta.numItems $limit) -}}
+
+{{- range seq 0 $numPages -}}
+  {{- $start := mul . $limit -}}
+  {{- $url := printf "https://api.zotero.org/groups/%d/items?start=%d&limit=%d&format=json" $groupId $start $limit -}}
+  {{- $batch := resources.GetRemote $url | transform.Unmarshal -}}
+  {{- if $batch }}
+    {{- $scratch.Add "items" $batch -}}
+  {{- end }}
+{{- end -}}
+
+{{- return ($scratch.Get "items") -}}

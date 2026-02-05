@@ -1,0 +1,41 @@
+{{- $items := .items -}}
+{{- $params := .params -}}
+{{- $onlyCited := .onlyCited -}}
+{{- $citedTitles := .citedTitles -}}
+
+{{- $filtered := slice -}}
+
+{{- range $items }}
+  {{- $entry := .data -}}
+  {{- $include := true -}}
+
+  {{- range $key, $val := $params }}
+    {{- if and (ne $key "cited") (ne $key "authorNum") }}
+      {{- if eq $key "keyword" }}
+        {{- $flat := "" -}}
+        {{- range $k, $v := $entry }}
+          {{- if reflect.IsSlice $v }}
+            {{- range $v }}{{ $flat = printf "%s %v" $flat . }}{{ end }}
+          {{- else }}
+            {{- $flat = printf "%s %v" $flat $v }}
+          {{- end }}
+        {{- end }}
+        {{- if not (in ($flat | lower) ($val | lower)) }}
+          {{- $include = false -}}
+        {{- end }}
+      {{- else }}
+        {{- $entryVal := index $entry $key -}}
+        {{- $str := printf "%v" $entryVal -}}
+        {{- if not (in ($str | lower) ($val | lower)) }}
+          {{- $include = false -}}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if and $include (or (not $onlyCited) (in $citedTitles $entry.title)) }}
+    {{- $filtered = $filtered | append $entry -}}
+  {{- end }}
+{{- end }}
+
+{{- return $filtered -}}

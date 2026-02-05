@@ -13,11 +13,12 @@
 
 {{- $context := . }}
 {{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
+{{$citedTitles :=  default (slice) -}}
 
 {{- if $onlyCited }}
-  {{- $citedTitles := .Site.Store.Get "cited_titles" | default (slice) -}}
+  {{- $citedTitles = .Site.Store.Get "cited_titles" | default (slice) -}}
 {{- else }}
-  {{- $citedTitles := .Site.Store.Get "bib-record" | default (slice) -}}
+  {{- $citedTitles = .Site.Store.Get "bib-record" | default (slice) -}}
   {{ $onlyCited = true }}
 {{- end }}
 

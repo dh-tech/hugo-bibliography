@@ -1,0 +1,77 @@
+{{- /* INPUT */ -}}
+{{- $groupId := . -}}
+
+{{- /* FETCH COLLECTIONS */ -}}
+{{- $endpoint := printf "https://api.zotero.org/groups/%d/collections?start=0&limit=100&format=json" $groupId -}}
+{{- $remote := resources.GetRemote $endpoint | transform.Unmarshal -}}
+{{- $collections := $remote -}}
+
+{{- /* MAP: key -> collection object (with children slot) */ -}}
+{{- $collectionMap := dict -}}
+
+{{- range $collections }}
+  {{- $key := .data.key -}}
+  {{- $collectionMap = merge $collectionMap (dict
+      $key (merge .data (dict "children" (slice)))
+  ) -}}
+{{- end }}
+
+{{- /* MAP: parentKey -> [childKey, ...] */ -}}
+{{- $childKeys := dict -}}
+
+{{- range $collections }}
+  {{- $childKey := .data.key -}}
+  {{- $parentKey := .data.parentCollection -}}
+
+  {{- $hasParent := and
+      $parentKey
+      (ne $parentKey false)
+      (ne $parentKey "false")
+      (ne $parentKey "")
+  -}}
+
+  {{- if $hasParent }}
+    {{- $existing := index $childKeys $parentKey | default (slice) -}}
+    {{- $childKeys = merge $childKeys (dict
+        $parentKey (append $existing $childKey)
+    ) -}}
+  {{- end }}
+{{- end }}
+
+{{- /* ATTACH CHILDREN TO PARENTS */ -}}
+{{- range $parentKey, $childList := $childKeys }}
+  {{- $parent := index $collectionMap $parentKey -}}
+  {{- if $parent }}
+    {{- $children := $parent.children -}}
+    {{- range $childList }}
+      {{- $child := index $collectionMap . -}}
+      {{- if $child }}
+        {{- $children = append $children $child -}}
+      {{- end }}
+    {{- end }}
+
+    {{- $collectionMap = merge $collectionMap (dict
+        $parentKey (merge $parent (dict "children" $children))
+    ) -}}
+  {{- end }}
+{{- end }}
+
+{{- /* ROOT COLLECTIONS (no parent) */ -}}
+{{- $roots := slice -}}
+
+{{- range $k, $collection := $collectionMap }}
+  {{- $parentKey := $collection.parentCollection -}}
+  {{- $hasParent := and
+      $parentKey
+      (ne $parentKey false)
+      (ne $parentKey "false")
+      (ne $parentKey "")
+  -}}
+
+  {{- if not $hasParent }}
+    {{- $roots = append $roots $collection -}}
+  {{- end }}
+{{- end }}
+
+{{- /* SORT ROOTS BY NAME */ -}}
+{{- return (sort $roots "name") -}}
