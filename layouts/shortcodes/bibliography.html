@@ -40,10 +40,10 @@
 
 <ul class="apa-citation-list">
   {{ range $citations }}
-    {{ partial "render-citation.html" . }}
+    {{ partial "render/render-citation.html" . }}
   {{ end }}
   {{ range $collections }}
-    {{ partial "render-collection.html" (dict
+    {{ partial "render/render-collection.html" (dict
       "collection" .
       "citations" $citations
     ) }}
