@@ -103,3 +103,6 @@ Hugo-Bibliography can be customized in a few ways. The styling for the bibliogra
 
 You will notice the styling used for the apa-citation is contained at the top of the file. If you would like to change the bibliography's style (eg. type-face, font-size, padding) you can add your own style rules here. Note that the italics is done through i tags instead of style rules.
 
+As for changing the citation style itself, this can be done by modifying the layouts/partials/render/render-citation.html file for bibliography citations or layouts/shortcodes/cite.html for in-text citations.
+
+
