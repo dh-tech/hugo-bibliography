@@ -1,0 +1,26 @@
+{{- $urls := slice -}}
+
+{{- $context := . }}
+{{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
+{{$citedTitles := default (slice) -}}
+
+{{- $citedTitles = .Site.Store.Get "cited_titles" | default (slice) -}}
+<p>citedTitles: {{$citedTitles}}</p>
+
+{{ $items := partial "zotero/fetch-items.html" (dict "groupId" site.Params.groupId) }}
+
+{{range $items }}
+<p>items: {{.data.title}}</p>
+
+{{ if in .data.title $citedTitles }}
+<p>citedTitles: {{ .data.url}}</p>
+{{end}}
+{{end}}
+
+
+<ul class="url-list">
+  {{- range $urls }}
+    <li><a href="{{ .url }}">{{ .title }}</a></li>
+  {{- end }}
+</ul> </ul>
+
