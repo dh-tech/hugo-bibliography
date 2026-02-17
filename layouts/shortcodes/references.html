@@ -1,20 +1,17 @@
 {{- $urls := slice -}}
 
 {{- $context := . }}
-{{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
 {{$citedTitles := default (slice) -}}
 
-{{- $citedTitles = .Site.Store.Get "cited_titles" | default (slice) -}}
-<p>citedTitles: {{$citedTitles}}</p>
+{{- $citedTitles := $context.Page.Scratch.Get "cited_titles" | default (slice) }}
+
 
 {{ $items := partial "zotero/fetch-items.html" (dict "groupId" site.Params.groupId) }}
 
 {{range $items }}
-<p>items: {{.data.title}}</p>
-
-{{ if in .data.title $citedTitles }}
-<p>citedTitles: {{ .data.url}}</p>
-{{end}}
+  {{- if (in $citedTitles .data.title) }}
+    {{ $urls = $urls | append (dict "title" .data.title "url" .data.url) }}
+  {{- end }}
 {{end}}
 
 
