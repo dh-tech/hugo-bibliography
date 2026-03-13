@@ -1,0 +1,87 @@
+<style>
+.tooltip-wrapper {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dotted currentColor;
+}
+
+.tooltip-box {
+  visibility: hidden;
+  opacity: 0;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+
+  transition: opacity 0.2s ease;
+}
+
+.tooltip-box::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #333;
+}
+
+.tooltip-wrapper:hover .tooltip-box {
+  visibility: visible;
+  opacity: 1;
+}
+</style>
+
+{{ $title := .Get "title" }}
+
+{{ .Page.Scratch.Add "count" 1 }}
+{{- $already := $.Page.Scratch.Get "cited_titles" | default (slice) }}
+{{- if not (in $already $title) }}
+  {{- $.Page.Scratch.Add "cited_titles" (slice $title) }}
+{{- end }}
+{{- .Page.Site.Store.Set "cited_titles" ($.Page.Scratch.Get "cited_titles") -}}
+
+{{- $context := . }}
+{{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
+{{- $citedTitles := $context.Page.Scratch.Get "cited_titles" | default (slice) }}
+{{ $tag := index $.Page.Params.tags 0 }}
+{{- $hasFilters := or ( and $context.IsNamedParams (gt (len $context.Params) 0) ) ($tag) }}
+{{- $authorParam := $context.Get "authorNum" | default "5" }}
+{{- $authorNum := int $authorParam }}
+
+{{ $items := partial "zotero/fetch-items.html" (dict "groupId" site.Params.groupId) }}
+
+{{ $filtered := partial "zotero/filter-items.html" (dict
+  "items" $items
+  "params" .Params
+  "onlyCited" $onlyCited
+  "citedTitles" $citedTitles
+) }}
+
+{{ $citations := partial "zotero/build-citations.html" (dict
+  "items" $filtered
+  "authorNum" $authorNum
+) }}
+
+{{$citation := dict}}
+{{range $citations }}
+{{if eq .citation.title $title}}
+<p>{{.}}</p>
+{{end}}
+{{end}}
+
+<span class="tooltip-wrapper">
+    {{.Page.Scratch.Get "count"}}
+    <span class="tooltip-box">
+        {{$citation.citation.title}}
+    {{ partial "render/render-citation.html" $citation }}
+    </span>
+</span>
