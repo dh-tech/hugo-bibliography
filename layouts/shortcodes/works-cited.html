@@ -1,0 +1,67 @@
+<style>
+    .apa-citation {
+        margin-bottom: 1rem;
+        text-indent: -2rem;
+        padding-left: 2rem;
+    }
+</style>
+
+{{/* fetch */}}
+{{- $citations := slice -}}
+
+{{- $context := . }}
+{{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
+
+{{- $citedTitles := slice -}}
+{{- if $onlyCited }}
+  {{- $citedTitles = .Site.Store.Get "cited_titles" | default (slice) -}}
+{{- else }}
+  {{- $citedTitles = .Site.Store.Get "bib-record" | default (slice) -}}
+  {{- $onlyCited = true }}
+{{- end }}
+
+{{- $hasFilters := and $context.IsNamedParams (gt (len $context.Params) 0) }}
+{{- $authorParam := $context.Get "authorNum" | default "3" }}
+{{- $authorNum := int $authorParam }}
+
+{{- $singleCollection := false }}
+{{- if $hasFilters }}
+  {{- range $key, $val := $context.Params }}
+    {{- if eq $key "collections" }}
+      {{- $singleCollection = true }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{ $items := partial "zotero/fetch-items.html" (dict "groupId" site.Params.groupId) }}
+
+{{ $filtered := partial "zotero/filter-items.html" (dict
+  "items"       $items
+  "params"      $context.Params
+  "onlyCited"   $onlyCited
+  "citedTitles" $citedTitles
+) }}
+
+{{ $citations := partial "zotero/build-citations.html" (dict
+  "items"     $filtered
+  "authorNum" $authorNum
+) }}
+
+{{ $collections := partial "zotero/build-collection-tree.html" site.Params.groupId }}
+
+<ul style="list-style-type: none;" class="apa-citation-list">
+  {{- range $citation := $citations }}
+    {{- $cols := $citation.citation.collections | default (slice) }}
+    {{- if eq (len $cols) 0 }}
+      {{- partial "render/render-citation.html" . }}
+    {{- end }}
+  {{- end }}
+
+  {{- range $collections }}
+    {{- partial "render/render-collection.html" (dict
+      "collection"       .
+      "citations"        $citations
+      "singleCollection" $singleCollection
+    ) }}
+  {{- end }}
+</ul> </ul>

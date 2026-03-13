@@ -1,0 +1,56 @@
+{{- $data := .citation }}
+{{- $authorStr := .authorStr }}
+
+{{- $year := "" }}
+{{- with $data.date }}
+  {{- $parts := split . "/" }}
+  {{- range $parts }}
+    {{- if and (eq (len .) 4) (eq $year "") }}
+      {{- $year = . }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- $title := $data.title | markdownify | plainify }}
+{{- $journal := $data.publicationTitle }}
+{{- $volume := $data.volume }}
+{{- $issue := $data.issue }}
+{{- $pages := $data.pages }}
+{{- $doi := $data.DOI }}
+{{- $itemType := $data.itemType }}
+{{- $url := $data.url }}
+{{- $websiteTitle := $data.websiteTitle }}
+{{- $encyclopediaTitle := $data.encyclopediaTitle }}
+
+
+{{- if not (eq $itemType "attachment")}}
+    {{- if or (eq $itemType "webpage") (eq $itemType "encyclopediaArticle")}}
+    <li class="apa-citation">
+    {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ else }} <span class="citation-author">(no author)</span>{{ end }}
+        {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
+        {{ if $title }}<span class="citation-title">{{ $title }}</span>.{{ end }}
+        {{ if $websiteTitle }}<span class="citation-website"><i>{{ $websiteTitle }}</i></span>.{{ end }}
+        {{ if $encyclopediaTitle }}<span class="citation-encyclopedia"><i>{{ $encyclopediaTitle }}</i></span>.{{ end }}
+        {{ if $url }}<a class="citation-url" href="{{ $url }}">{{ $url }}</a>{{ end }}
+        {{ if $doi }}<a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>{{ end }}
+        <span class="Z3988" title="ctx_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.atitle={{ urlquery $title }}&rft.jtitle={{ urlquery $journal }}&rft.date={{ $year }}&rft.au={{ urlquery $authorStr }}&rft.volume={{ $volume }}&rft.issue={{ $issue }}&rft.spage={{ index (split $pages "-") 0 }}&rft.epage={{ index (split $pages "-") 1 }}&rft_id=info:doi/{{ $doi }}">
+        </span>
+    </li>
+    {{- else}}
+  <li class="apa-citation">
+    {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ else }} <span class="citation-author">(no author)</span>{{ end }}
+    {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
+    {{ if $title }}<span class="citation-title">{{ $title }}</span>.{{ end }}
+    {{ if $journal }}<span class="citation-journal"><i>{{ $journal }}</i></span>,{{ end }}
+    {{ if $volume }}<span class="citation-volume"><i>{{ $volume }}</i></span>{{ end }}
+    {{ if $issue }}<span class="citation-issue">({{ $issue }})</span>,{{ end }}
+    {{ if $pages }}<span class="citation-pages">{{ $pages }}</span>.{{ end }}
+    {{ if $doi }}<a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>{{ end }}
+    <span class="Z3988" title="ctx_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.atitle={{ urlquery $title }}&rft.jtitle={{ urlquery $journal }}&rft.date={{ $year }}&rft.au={{ urlquery $authorStr }}&rft.volume={{ $volume }}&rft.issue={{ $issue }}&rft.spage={{ index (split $pages "-") 0 }}&rft.epage={{ index (split $pages "-") 1 }}&rft_id=info:doi/{{ $doi }}">
+    </span>
+  </li>
+    {{- end}}
+{{- site.Store.Add "bib-record" (slice $data) -}}
+
+
+{{- end }}

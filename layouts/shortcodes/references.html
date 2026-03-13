@@ -1,0 +1,23 @@
+{{- $urls := slice -}}
+
+{{- $context := . }}
+{{$citedTitles := default (slice) -}}
+
+{{- $citedTitles := $context.Page.Scratch.Get "cited_titles" | default (slice) }}
+
+
+{{ $items := partial "zotero/fetch-items.html" (dict "groupId" site.Params.groupId) }}
+
+{{range $items }}
+  {{- if (in $citedTitles .data.title) }}
+    {{ $urls = $urls | append (dict "title" .data.title "url" .data.url) }}
+  {{- end }}
+{{end}}
+
+
+<ul class="url-list">
+  {{- range $urls }}
+    <li><a href="{{ .url }}">{{ .title }}</a></li>
+  {{- end }}
+</ul> </ul>
+

@@ -1,3 +1,4 @@
+
 <style>
     .apa-citation {
         margin-bottom: 1rem;
@@ -14,196 +15,38 @@
 {{- $context := . }}
 {{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
 {{- $citedTitles := $context.Page.Scratch.Get "cited_titles" | default (slice) }}
-{{- $hasFilters := and $context.IsNamedParams (gt (len $context.Params) 0) }}
-{{- $authorParam := $context.Get "authorNum" | default "3" }}
+{{ $tag := index $.Page.Params.tags 0 }}
+{{- $hasFilters := or ( and $context.IsNamedParams (gt (len $context.Params) 0) ) ($tag) }}
+{{- $authorParam := $context.Get "authorNum" | default "5" }}
 {{- $authorNum := int $authorParam }}
 
 
-{{ $groupId := site.Params.groupId }}
-{{ $scratch := newScratch }}
-{{ $scratch.Set "items" slice }}
-{{ $limit := 100 }}
+{{ $items := partial "zotero/fetch-items.html" (dict "groupId" site.Params.groupId) }}
 
-{{ $url := printf "https://api.zotero.org/groups/%d/" $groupId }}
-{{ $resource := resources.GetRemote $url | transform.Unmarshal }}
-{{ $numItems := $resource.meta.numItems }}
-{{ $numPages := math.Ceil (div $numItems $limit) }}
+{{ $filtered := partial "zotero/filter-items.html" (dict
+  "items" $items
+  "params" .Params
+  "onlyCited" $onlyCited
+  "citedTitles" $citedTitles
+) }}
 
-{{ range seq 0 $numPages }}
-  {{ $start := mul . $limit }}
-  {{ $url := printf "https://api.zotero.org/groups/%d/items?start=%d&limit=%d&format=json" $groupId $start $limit }}
-  {{ $batch := resources.GetRemote $url | transform.Unmarshal }}
-  {{ if $batch }}
-    {{ $scratch.Add "items" $batch }}
+{{ $citations := partial "zotero/build-citations.html" (dict
+  "items" $filtered
+  "authorNum" $authorNum
+) }}
+
+
+{{ $collections := partial "zotero/build-collection-tree.html" site.Params.groupId }}
+
+<ul class="apa-citation-list">
+  {{ range $citations }}
+    {{ partial "render/render-citation.html" . }}
   {{ end }}
-{{ end }}
-
-{{ $items := $scratch.Get "items" }}
-{{ $data := $items }}
-
-{{ range $data }}
-{{ $entry := .data }}
-
-<!-- determines if entry should be included based on filters, checks if value is anywhere in the key -->
-{{- $include := true }}
-
-{{- if $hasFilters }}
-  {{- range $key, $val := $context.Params }}
-    {{- if and (ne $key "cited") (ne $key "authorNum") }}
-
-        <!-- special keyword search through entire citation -->
-       {{- if eq $key "keyword" }}
-        {{- $flat := "" }}
-
-        {{/* flatten entire entry into one lowercase string */}}
-        {{- range $k, $v := $entry }}
-          {{- if reflect.IsSlice $v }}
-            {{- range $v }}
-              {{- $flat = printf "%s %v" $flat . }}
-            {{- end }}
-          {{- else }}
-            {{- $flat = printf "%s %v" $flat $v }}
-          {{- end }}
-        {{- end }}
-
-        {{- if not (in ($flat | lower) ($val | lower)) }}
-          {{- $include = false }}
-        {{- end }}
-
-      {{ else }}
-
-
-      {{- $entryVal := index $entry $key }}
-
-      {{- if reflect.IsSlice $entryVal }}
-        {{- $found := false }}
-        {{- range $entryVal }}
-          {{- $elem := printf "%v" . }}
-          {{- if in ($elem | lower) ($val | lower) }}
-            {{- $found = true }}
-          {{- end }}
-        {{- end }}
-        {{- if not $found }}
-          {{- $include = false }}
-        {{- end }}
-      {{- else }}
-        {{- $strVal := printf "%v" $entryVal }}
-        {{- if not (in ($strVal | lower) ($val | lower)) }}
-          {{- $include = false }}
-        {{- end }}
-      {{- end }}
-      {{- end }}
-
-    {{- end }}
-  {{- end }}
-{{- end }}
-
-    <!-- adds entry to citations if it should be included based on filters and in-text citations -->
-    {{- if and $include (or (not $onlyCited) (in $citedTitles $entry.title)) }}
-            {{- $authors := slice }}
-            {{- range $entry.creators }}                
-                {{- if eq .creatorType "author" }}
-                    {{- $firstInitial := "" }}
-                    {{- if .firstName }}
-                        {{- $firstInitial = printf "%s." (substr .firstName 0 1) }}
-                    {{- end }}
-                    {{- if .lastName }}
-                        {{- $name := printf "%s, %s" .lastName $firstInitial }}
-                        {{- $authors = $authors | append $name }}
-                    {{- end }}
-                {{- end }}
-            {{- end }}
-
-            {{- $authorStr := delimit $authors ", " }}
-            {{- $shownAuthors := first $authorNum $authors }}
-            {{- $authorList := delimit $shownAuthors ", " }}
-            {{- if ge (len $authors) $authorNum }}
-                {{- $authorStr = printf "%s et al." ($authorList) }}
-            {{ else }}
-                {{- $authorStr = $authorList }}
-            {{- end }}
-            {{- $citation := dict "authorStr" $authorStr "citation" $entry -}}
-            {{- $citations = $citations | append $citation }}
-    {{- end }}    
-{{ end }}
-
-{{$sortedCitations := sort $citations "authorStr" }}
-
-{{ $endpoint := printf "https://api.zotero.org/groups/%d/collections?start=0&limit=100&format=json" $groupId }}
-{{ $remote := resources.GetRemote $endpoint | transform.Unmarshal }}
-
-{{ $collections := $remote }}
-  {{- $singleCollection := false }}
-  {{- if $hasFilters }}
-    {{- range $key, $val := $context.Params }}
-      {{- if eq $key "collections" }}
-        {{- $singleCollection = true }}
-      {{- end }}
-    {{- end }}
-  {{- end }}
-
-
-{{/* Build collectionMap to easily look up collections by key */}}
-{{ $collectionMap := dict }}
-{{ range $collections }}
-  {{ $k := .data.key }}
-  {{ $obj := merge .data (dict "children" (slice)) }}
-  {{ $collectionMap = merge $collectionMap (dict $k $obj) }}
-{{ end }}
-
-{{/* Build childKeysMap (parentKey => [childKey,...]) */}}
-{{ $childKeysMap := dict }}
-{{ range $collections }}
-  {{ $childKey := .data.key }}
-  {{ $parentKey := .data.parentCollection }}
-
-  {{/*treat boolean false and "false" and "" and nil as no-parent */}}
-  {{ $hasParent := and $parentKey (ne $parentKey false) (ne $parentKey "false") (ne $parentKey "") }}
-
-  {{ if $hasParent }}
-    {{ $existing := index $childKeysMap $parentKey | default (slice) }}
-    {{ $existing = $existing | append $childKey }}
-    {{ $childKeysMap = merge $childKeysMap (dict $parentKey $existing) }}
+  {{ range $collections }}
+    {{ partial "render/render-collection.html" (dict
+      "collection" .
+      "citations" $citations
+    ) }}
   {{ end }}
-{{ end }}
-
-{{/* Attach children to parents */}}
-{{ range $parentKey, $childKeySlice := $childKeysMap }}
-  {{ $parent := index $collectionMap $parentKey }}
-  {{ if $parent }}
-    {{ $currentChild := $parent.children | default (slice) }}
-    {{ range $childKeySlice }}
-      {{ $childObj := index $collectionMap . }}
-      {{ if $childObj }}
-        {{ $currentChild = $currentChild| append $childObj }}
-      {{ end }}
-    {{ end }}
-    {{ $updatedParent := merge $parent (dict "children" $currentChild) }}
-    {{ $collectionMap = merge $collectionMap (dict $parentKey $updatedParent) }}
-  {{ end }}
-{{ end }}
-
-{{/* Compute roots array we can iterate over for rendering */}}
-{{ $roots := slice }}
-{{ range $k, $obj := $collectionMap }}
-  {{ $parentKey := $obj.parentCollection }}
-  {{ $hasParent := and $parentKey (ne $parentKey false) (ne $parentKey "false") (ne $parentKey "") }}
-  {{ if not $hasParent }}
-    {{ $roots = $roots | append $obj }}
-  {{ end }}
-{{ end }}
-
-{{ $sortedCollections := sort $roots "name" }}
-
-  <ul style="list-style-type: none;" class="apa-citation-list">
-      {{- range $citation := $sortedCitations }}
-        {{- $collections := $citation.citation.collections | default (slice) }}
-        {{- if eq (len $collections) 0 }}
-          {{- partial "render-citation.html" . }}
-        {{- end }}
-      {{- end }} 
-
-      {{- range $sortedCollections }}
-        {{ partial "render-collection.html" (dict "collection" . "citations" $sortedCitations "singleCollection" $singleCollection) }}
-      {{- end }}
-  </ul>
+</ul>
+ </ul>

@@ -72,9 +72,15 @@ To add an in-text citation, use the cite shortcode and specify the title of the 
 
 `{{<cite title="Title Of Work">}}`
 
-Finally, you can generate a bibliography of only the works that have been cited on a given page using the following:
+You can generate a bibliography of only the works that have been cited on a given page using the following:
 
 `{{<bibliography cited="true">}}`
+
+You can also generate a bibliography of the works that have been cited throughout your entire site using the following:
+
+`{{<works-cited>}}`
+
+Note that this feature requires site.Store which is only available in hugo 0.138.0 and above.
 
 
 #### Zotero detection

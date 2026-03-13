@@ -1,0 +1,26 @@
+{{- $items := .items -}}
+{{- $authorNum := .authorNum -}}
+{{- $citations := slice -}}
+
+{{- range $items }}
+  {{- $authors := slice -}}
+  {{- range .creators }}
+    {{- if eq .creatorType "author" }}
+      {{- $initial := cond .firstName (printf "%s." (substr .firstName 0 1)) "" -}}
+      {{- $authors = $authors | append (printf "%s, %s" .lastName $initial) -}}
+    {{- end }}
+  {{- end }}
+
+  {{- $shown := first $authorNum $authors -}}
+  {{- $authorStr := delimit $shown ", " -}}
+  {{- if gt (len $authors) $authorNum }}
+    {{- $authorStr = printf "%s et al." $authorStr -}}
+  {{- end }}
+
+  {{- $citations = $citations | append (dict
+      "authorStr" $authorStr
+      "citation" .
+  ) -}}
+{{- end }}
+
+{{- return (sort $citations "authorStr") -}}
