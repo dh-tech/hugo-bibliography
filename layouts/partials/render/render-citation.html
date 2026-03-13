@@ -3,9 +3,11 @@
 
 {{- $year := "" }}
 {{- with $data.date }}
-  {{- $parts := split . "-" }}
-  {{- if gt (len $parts) 0 }}
-    {{- $year = index $parts 0 }}
+  {{- $parts := split . "/" }}
+  {{- range $parts }}
+    {{- if and (eq (len .) 4) (eq $year "") }}
+      {{- $year = . }}
+    {{- end }}
   {{- end }}
 {{- end }}
 
@@ -48,7 +50,7 @@
     </span>
   </li>
     {{- end}}
-{{- site.Store.add "bib-record" (slice $data) -}}
+{{- site.Store.Add "bib-record" (slice $data) -}}
 
 
 {{- end }}

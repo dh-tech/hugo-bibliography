@@ -1,7 +1,10 @@
 {{ $title := .Get "title" }}
 
-{{- $.Page.Scratch.Add "cited_titles" (slice $title) -}}
-{{- .Page.Site.Store.Add "cited_titles" (slice $title) -}}
+{{- $already := $.Page.Scratch.Get "cited_titles" | default (slice) }}
+{{- if not (in $already $title) }}
+  {{- $.Page.Scratch.Add "cited_titles" (slice $title) }}
+{{- end }}
+{{- .Page.Site.Store.Set "cited_titles" ($.Page.Scratch.Get "cited_titles") -}}
 
 {{ $groupId := site.Params.groupId }}
 {{ $endpoint := printf "https://api.zotero.org/groups/%d/items?start=0&limit=100&format=json" $groupId }}
@@ -9,6 +12,7 @@
 {{ $remote := resources.GetRemote $endpoint }}
 {{ with $remote }}
 {{ $data := .Content | transform.Unmarshal }}
+{{ $found := false }}
 {{- range $data }}
 {{$entry := .data}}
 
@@ -20,7 +24,8 @@
   {{- end }}
 {{- end }}
 
-{{- if eq $entry.title $title }}
+{{- if and (not $found) (eq $entry.title $title) }}
+      {{- $found = true }}
 <p>
     {{- $authors := slice -}}
     {{- range $entry.creators }}

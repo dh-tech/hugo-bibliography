@@ -18,7 +18,7 @@
     {{ range $citation := $allCitations }}
         {{ $collectionKeys := $citation.citation.collections | default (slice) }}
         {{ if in $collectionKeys $thisKey }}
-            {{ partial "render-citation.html" $citation }}
+            {{ partial "render/render-citation.html" $citation }}
         {{ end }}
     {{ end }}
 
