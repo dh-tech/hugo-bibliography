@@ -72,16 +72,12 @@
 ) }}
 
 {{$citation := dict}}
-{{range $citations }}
-{{if eq .citation.title $title}}
-<p>{{.}}</p>
-{{end}}
-{{end}}
-
 <span class="tooltip-wrapper">
     {{.Page.Scratch.Get "count"}}
     <span class="tooltip-box">
-        {{$citation.citation.title}}
-    {{ partial "render/render-citation.html" $citation }}
+{{range $citations }}
+  {{if eq .citation.title $title}}
+  {{end}}
+{{end}}
     </span>
 </span>
