@@ -1,4 +1,5 @@
 {{- $groupId := .groupId -}}
+{{- $cslFile := .cslFile -}}
 {{- $limit := 100 -}}
 {{- $scratch := newScratch -}}
 {{- $scratch.Set "items" (slice) -}}
@@ -7,6 +8,15 @@
 {{- $meta := resources.GetRemote $metaURL | transform.Unmarshal -}}
 {{- $numPages := math.Ceil (div $meta.meta.numItems $limit) -}}
 
+{{- if $cslFile -}}
+  {{- $raw := resources.Get $cslFile | transform.Unmarshal -}}
+  {{- if $raw -}}
+    {{- $scratch.Set "items" $raw -}}
+  {{- else -}}
+    {{- warnf "zotero-fetch: could not load CSL JSON file at %q" $cslFile -}}
+  {{- end -}}
+{{- else if $groupId -}}
+
 {{- range seq 0 $numPages -}}
   {{- $start := mul . $limit -}}
   {{- $url := printf "https://api.zotero.org/groups/%d/items?start=%d&limit=%d&format=json" $groupId $start $limit -}}
@@ -14,6 +24,8 @@
   {{- if $batch }}
     {{- $scratch.Add "items" $batch -}}
   {{- end }}
+{{- else -}}
+  {{- warnf "zotero-fetch: provide either 'groupId' or 'cslFile'" -}}
 {{- end -}}
 
 {{- return ($scratch.Get "items") -}}
