@@ -2,7 +2,6 @@
 .tooltip-wrapper {
   position: relative;
   cursor: help;
-  border-bottom: 1px dotted currentColor;
 }
 
 .tooltip-box {
@@ -10,16 +9,23 @@
   opacity: 0;
   background-color: #333;
   color: #fff;
-  text-align: center;
-  padding: 5px 10px;
+  text-align: left;
+  padding: 8px 12px;
   border-radius: 4px;
-  white-space: nowrap;
+
+  max-width: 260px;
+  width: max-content;
+  white-space: normal;
+  line-height: 1.4;
 
   position: absolute;
-  bottom: 125%;
+  bottom: calc(100% + 1.2em);
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
+
+  font-size: 1rem;
+  vertical-align: baseline;
 
   transition: opacity 0.2s ease;
 }
@@ -72,12 +78,73 @@
 ) }}
 
 {{$citation := dict}}
-<span class="tooltip-wrapper">
-    {{.Page.Scratch.Get "count"}}
+
+<sup class="tooltip-wrapper">
+
+    [{{.Page.Scratch.Get "count"}}]
     <span class="tooltip-box">
+        {{$citation.citation.title}}
+
 {{range $citations }}
-  {{if eq .citation.title $title}}
-  {{end}}
-{{end}}
+{{if eq .citation.title $title}}
+
+{{- $data := .citation }}
+{{- $authorStr := .authorStr }}
+
+{{- $year := "" }}
+{{- with $data.date }}
+  {{- $parts := split . "/" }}
+  {{- range $parts }}
+    {{- if and (eq (len .) 4) (eq $year "") }}
+      {{- $year = . }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- $title := $data.title | markdownify | plainify }}
+{{- $journal := $data.publicationTitle }}
+{{- $volume := $data.volume }}
+{{- $issue := $data.issue }}
+{{- $pages := $data.pages }}
+{{- $doi := $data.DOI }}
+{{- $itemType := $data.itemType }}
+{{- $url := $data.url }}
+{{- $websiteTitle := $data.websiteTitle }}
+{{- $encyclopediaTitle := $data.encyclopediaTitle }}
+
+
+{{- if not (eq $itemType "attachment")}}
+    {{- if or (eq $itemType "webpage") (eq $itemType "encyclopediaArticle")}}
+    <span class="apa-citation">
+    {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ else }} <span class="citation-author">(no author)</span>{{ end }}
+        {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
+        {{ if $title }}<span class="citation-title">{{ $title }}</span>.{{ end }}
+        {{ if $websiteTitle }}<span class="citation-website"><i>{{ $websiteTitle }}</i></span>.{{ end }}
+        {{ if $encyclopediaTitle }}<span class="citation-encyclopedia"><i>{{ $encyclopediaTitle }}</i></span>.{{ end }}
+        {{ if $url }}<a class="citation-url" href="{{ $url }}">{{ $url }}</a>{{ end }}
+        {{ if $doi }}<a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>{{ end }}
+        <span class="Z3988" title="ctx_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.atitle={{ urlquery $title }}&rft.jtitle={{ urlquery $journal }}&rft.date={{ $year }}&rft.au={{ urlquery $authorStr }}&rft.volume={{ $volume }}&rft.issue={{ $issue }}&rft.spage={{ index (split $pages "-") 0 }}&rft.epage={{ index (split $pages "-") 1 }}&rft_id=info:doi/{{ $doi }}">
+        </span>
     </span>
-</span>
+    {{- else}}
+  <span class="apa-citation">
+    {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ else }} <span class="citation-author">(no author)</span>{{ end }}
+    {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
+    {{ if $title }}<span class="citation-title">{{ $title }}</span>.{{ end }}
+    {{ if $journal }}<span class="citation-journal"><i>{{ $journal }}</i></span>,{{ end }}
+    {{ if $volume }}<span class="citation-volume"><i>{{ $volume }}</i></span>{{ end }}
+    {{ if $issue }}<span class="citation-issue">({{ $issue }})</span>,{{ end }}
+    {{ if $pages }}<span class="citation-pages">{{ $pages }}</span>.{{ end }}
+    {{ if $doi }}<a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>{{ end }}
+    <span class="Z3988" title="ctx_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.atitle={{ urlquery $title }}&rft.jtitle={{ urlquery $journal }}&rft.date={{ $year }}&rft.au={{ urlquery $authorStr }}&rft.volume={{ $volume }}&rft.issue={{ $issue }}&rft.spage={{ index (split $pages "-") 0 }}&rft.epage={{ index (split $pages "-") 1 }}&rft_id=info:doi/{{ $doi }}">
+    </span>
+  </li>
+    {{- end}}
+{{- site.Store.Add "bib-record" (slice $data) -}}
+
+{{- end }}
+{{end}}
+{{end}}
+
+    </span>
+</sup>
