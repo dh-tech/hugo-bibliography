@@ -40,6 +40,15 @@
   border-top-color: #333;
 }
 
+.tooltip-box::before {
+  content: "";
+  position: absolute;
+  bottom: -1.2em;
+  left: 0;
+  width: 100%;
+  height: 1.2em;
+}
+
 .tooltip-wrapper:hover .tooltip-box {
   visibility: visible;
   opacity: 1;
@@ -80,8 +89,9 @@
 {{$citation := dict}}
 
 <sup class="tooltip-wrapper">
-
+  <a href="#ref-{{ .Page.Scratch.Get "count" }}">{{ .Get 0 }}
     [{{.Page.Scratch.Get "count"}}]
+    </a>
     <span class="tooltip-box">
         {{$citation.citation.title}}
 
