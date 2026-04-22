@@ -1,5 +1,105 @@
+<style>
+.tooltip-wrapper {
+  position: relative;
+  cursor: help;
+}
+
+.tooltip-box {
+  visibility: hidden;
+  opacity: 0;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 4px;
+
+  max-width: 260px;
+  width: max-content;
+  white-space: normal;
+  line-height: 1.4;
+
+  position: absolute;
+  bottom: calc(100% + 1.2em);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+
+  font-size: 1rem;
+  vertical-align: baseline;
+
+  transition: opacity 0.2s ease;
+}
+
+.tooltip-box::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #333;
+}
+
+.tooltip-box::before {
+  content: "";
+  position: absolute;
+  bottom: -1.2em;
+  left: 0;
+  width: 100%;
+  height: 1.2em;
+}
+
+.tooltip-wrapper:hover .tooltip-box {
+  visibility: visible;
+  opacity: 1;
+}
+</style>
+
+{{ $title := .Get "title" }}
+
+{{ .Page.Scratch.Add "count" 1 }}
+{{- $already := $.Page.Scratch.Get "cited_titles" | default (slice) }}
+{{- if not (in $already $title) }}
+  {{- $.Page.Scratch.Add "cited_titles" (slice $title) }}
+{{- end }}
+{{- .Page.Site.Store.Set "cited_titles" ($.Page.Scratch.Get "cited_titles") -}}
+
+{{- $context := . }}
+{{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
+{{- $citedTitles := $context.Page.Scratch.Get "cited_titles" | default (slice) }}
+{{ $tag := index $.Page.Params.tags 0 }}
+{{- $hasFilters := or ( and $context.IsNamedParams (gt (len $context.Params) 0) ) ($tag) }}
+{{- $authorParam := $context.Get "authorNum" | default "5" }}
+{{- $authorNum := int $authorParam }}
+
+{{ $items := partial "zotero/fetch-items.html" (dict "groupId" site.Params.groupId) }}
+
+{{ $filtered := partial "zotero/filter-items.html" (dict
+  "items" $items
+  "params" .Params
+  "onlyCited" $onlyCited
+  "citedTitles" $citedTitles
+) }}
+
+{{ $citations := partial "zotero/build-citations.html" (dict
+  "items" $filtered
+  "authorNum" $authorNum
+) }}
+
+{{$citation := dict}}
+
+<sup class="tooltip-wrapper">
+  <a href="#ref-{{ .Page.Scratch.Get "count" }}">{{ .Get 0 }}
+    [{{.Page.Scratch.Get "count"}}]
+    </a>
+    <span class="tooltip-box">
+        {{$citation.citation.title}}
+
+{{range $citations }}
+{{if eq .citation.title $title}}
+
 {{- $data := .citation }}
-{{- $authorStr := .author }}
+{{- $authorStr := .authorStr }}
 
 {{- $year := "" }}
 {{- with $data.date }}
@@ -25,7 +125,7 @@
 
 {{- if not (eq $itemType "attachment")}}
     {{- if or (eq $itemType "webpage") (eq $itemType "encyclopediaArticle")}}
-    <li class="apa-citation">
+    <span class="apa-citation">
     {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ else }} <span class="citation-author">(no author)</span>{{ end }}
         {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
         {{ if $title }}<span class="citation-title">{{ $title }}</span>.{{ end }}
@@ -35,9 +135,9 @@
         {{ if $doi }}<a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>{{ end }}
         <span class="Z3988" title="ctx_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.atitle={{ urlquery $title }}&rft.jtitle={{ urlquery $journal }}&rft.date={{ $year }}&rft.au={{ urlquery $authorStr }}&rft.volume={{ $volume }}&rft.issue={{ $issue }}&rft.spage={{ index (split $pages "-") 0 }}&rft.epage={{ index (split $pages "-") 1 }}&rft_id=info:doi/{{ $doi }}">
         </span>
-    </li>
+    </span>
     {{- else}}
-  <li class="apa-citation">
+  <span class="apa-citation">
     {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ else }} <span class="citation-author">(no author)</span>{{ end }}
     {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
     {{ if $title }}<span class="citation-title">{{ $title }}</span>.{{ end }}
@@ -52,5 +152,9 @@
     {{- end}}
 {{- site.Store.Add "bib-record" (slice $data) -}}
 
-
 {{- end }}
+{{end}}
+{{end}}
+
+    </span>
+</sup>
