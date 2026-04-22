@@ -26,7 +26,7 @@
 
 {{- if and (not $found) (eq $entry.title $title) }}
       {{- $found = true }}
-<p>
+<span>
     {{- $authors := slice -}}
     {{- range $entry.creators }}
 
@@ -57,7 +57,7 @@
     {{ else }}
 ({{$title}}, {{if $year}}{{$year}}{{else}}n.d.{{end}})
     {{ end }}
-</p>
+</span>
 {{- end}}
 {{- end}}
 {{- end}}

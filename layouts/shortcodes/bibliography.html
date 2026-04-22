@@ -38,6 +38,15 @@
 
 {{ $collections := partial "zotero/build-collection-tree.html" site.Params.groupId }}
 
+{{if $onlyCited }}
+<ul class="apa-citation-list">
+  {{ range $index, $citation := $citations }}
+    <div id="ref-{{ $index }}">
+    {{ partial "render/render-citation.html" $citation }}
+    </div>
+  {{ end }}
+</ul>
+{{else}}
 <ul class="apa-citation-list">
   {{ range $citations }}
     {{ partial "render/render-citation.html" . }}
@@ -49,4 +58,4 @@
     ) }}
   {{ end }}
 </ul>
- </ul>
+{{end}}
