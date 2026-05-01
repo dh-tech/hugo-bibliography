@@ -1,5 +1,5 @@
 {{- $data := .citation }}
-{{- $authorStr := .author }}
+{{- $authorStr := .authorStr }}
 
 {{- $year := "" }}
 {{- with $data.date }}
@@ -12,7 +12,7 @@
 {{- end }}
 
 {{- $title := $data.title | markdownify | plainify }}
-{{- $journal := $data.publicationTitle }}
+{{- $journal := or $data.publicationTitle $data.seriesTitle $data.bookTitle $data.proceedingsTitle }}
 {{- $volume := $data.volume }}
 {{- $issue := $data.issue }}
 {{- $pages := $data.pages }}
@@ -38,7 +38,7 @@
     </li>
     {{- else}}
   <li class="apa-citation">
-    {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ else }} <span class="citation-author">(no author)</span>{{ end }}
+    {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ else }}<span class="citation-author">(no author)</span>{{ end }}
     {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
     {{ if $title }}<span class="citation-title">{{ $title }}</span>.{{ end }}
     {{ if $journal }}<span class="citation-journal"><i>{{ $journal }}</i></span>,{{ end }}
