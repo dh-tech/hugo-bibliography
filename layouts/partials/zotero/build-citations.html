@@ -2,12 +2,17 @@
 {{- $authorNum := .authorNum -}}
 {{- $citations := slice -}}
 
+
 {{- range $items }}
   {{- $authors := slice -}}
   {{- range .creators }}
     {{- if eq .creatorType "author" }}
+        {{if or .firstName  .lastName  }}
       {{- $initial := cond .firstName (printf "%s." (substr .firstName 0 1)) "" -}}
       {{- $authors = $authors | append (printf "%s, %s" .lastName $initial) -}}
+        {{else}}
+      {{- $authors = $authors | append (printf "%s" .name) -}}
+        {{end}}
     {{- end }}
   {{- end }}
 
