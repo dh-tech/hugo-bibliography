@@ -5,9 +5,9 @@
 {{- range $items }}
   {{- $authors := slice -}}
   {{- range .creators }}
-    {{- if eq .creatorType "author" }}
+    {{- if or (eq .creatorType "author") (eq .creatorType "artist") }}
       {{- $initial := cond .firstName (printf "%s." (substr .firstName 0 1)) "" -}}
-      {{- $authors = $authors | append (printf "%s, %s" .lastName $initial) -}}
+      {{- $authors = $authors | append (or .name (printf "%s, %s" .lastName $initial)) -}}
     {{- end }}
   {{- end }}
 
