@@ -10,7 +10,7 @@
 {{- $citations := slice -}}
 
 {{- $context := . }}
-{{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
+{{- $onlyCited := true }}
 
 {{- $citedTitles := slice -}}
 {{- if $onlyCited }}
