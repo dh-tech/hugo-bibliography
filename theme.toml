@@ -1,31 +1,20 @@
 name = 'Hugo Bibliography'
 license = 'MIT'
 licenselink = 'https://github.com/dh-tech/hugo-bibliography/blob/main/LICENSE'
-description = 'Hugo Theme for generating bibliography from CSL-JSON files'
+description = 'Hugo Theme for generating a bibliography from a Zotero library'
 
 # The home page of the theme, where the source can be found
-homepage = 'https://github.com/owner/repo'
+homepage = 'https://github.com/dh-tech/hugo-bibliography'
 
 # If you have a running demo of the theme
-demosite = 'https://owner.github.io/repo'
+#demosite = 'https://owner.github.io/repo'
 
 # Taxonomy terms
-tags = ['blog', 'company']
-features = ['some', 'awesome', 'features']
+tags = ['bibliography']
+#features = ['some', 'awesome', 'features']
 
 # If the theme has multiple authors
 authors = [
-  {name = 'Name of author', homepage = 'Website of author'},
-  {name = 'Name of author', homepage = 'Website of author'}
+  {name = 'Tatsat Jha', homepage = 'https://github.com/TatsatJha'},
+  {name = 'Hugo-Bibliography contributors', homepage = 'https://github.com/dh-tech/hugo-bibliography/graphs/contributors'}
 ]
-
-# If the theme has a single author
-[author]
-  name = 'Your name'
-  homepage = 'Your website'
-
-# If porting an existing theme
-[original]
-  author = 'Name of original author'
-  homepage = 'Website of original author'
-  repo = 'https://github.com/owner/repo'
