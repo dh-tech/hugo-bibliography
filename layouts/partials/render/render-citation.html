@@ -21,6 +21,8 @@
 {{- $url := $data.url }}
 {{- $websiteTitle := $data.websiteTitle }}
 {{- $encyclopediaTitle := $data.encyclopediaTitle }}
+{{- $publisher := $data.publisher }}
+{{- $place := $data.place }}
 
 
 {{- if not (eq $itemType "attachment")}}
@@ -34,6 +36,16 @@
     {{ if $url }}<a class="citation-url" href="{{ $url }}">{{ $url }}</a>{{ end }}
     {{ if $doi }}<a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>{{ end }}
     <span class="Z3988" title="ctx_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.atitle={{ urlquery $title }}&rft.jtitle={{ urlquery $journal }}&rft.date={{ $year }}&rft.au={{ urlquery $authorStr }}&rft.volume={{ $volume }}&rft.issue={{ $issue }}&rft.spage={{ index (split $pages "-") 0 }}&rft.epage={{ index (split $pages "-") 1 }}&rft_id=info:doi/{{ $doi }}">
+    </span>
+  </li>
+  {{ else if (eq $itemType "book")}}
+  <li class="apa-citation">
+    {{ if $authorStr }}<span class="citation-author">{{ $authorStr }}</span>{{ else }}<span class="citation-author">(no author)</span>{{ end }}
+    {{ if $year }}<span class="citation-year">({{ $year }}).</span>{{ end }}
+    {{ if $title }}<span class="citation-book-title"><i>{{ $title }}</i></span>.{{ end }}
+    {{ if $publisher }}<span class="citation-publisher">{{ $publisher }}</span>.{{ end }}
+    {{ if $doi }}<a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>{{ end }}
+    <span class="Z3988" title="ctx_ver=Z39.88-2004&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&rft.genre=book&rft.btitle{{ urlquery $title }}&rft.place={{ urlquery $place }}&rft.publisher={{ $publisher }}&rft.au={{ urlquery $authorStr }}&rft.date={{ urlquery $year }}">
     </span>
   </li>
   {{- else}}
