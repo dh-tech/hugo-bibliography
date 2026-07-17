@@ -1,3 +1,10 @@
+{{/*
+  Downloads the raw Zotero bibliography items in a group.
+  
+  Returns a slice of maps.
+  
+  @params {string} groupId The Zotero group id.
+*/}}
 {{- $groupId := .groupId -}}
 {{- $limit := 100 -}}
 {{- $scratch := newScratch -}}

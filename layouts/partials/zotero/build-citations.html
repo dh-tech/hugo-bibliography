@@ -1,3 +1,12 @@
+{{/*
+  Adds list of authors as string.
+  
+  Returns a slice of maps with "authorStr": list of authors as string,
+  "key": Zotero item key, "citation": Zotero item map.
+  
+  @param {slice} items The Zotero bibliography items (.data member only).
+  @param {int} authorNum The number of authors in the author string.
+*/}}
 {{- $items := .items -}}
 {{- $authorNum := .authorNum -}}
 {{- $citations := slice -}}
@@ -19,6 +28,7 @@
 
   {{- $citations = $citations | append (dict
       "authorStr" $authorStr
+      "key" .key
       "citation" .
   ) -}}
 {{- end }}

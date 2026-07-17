@@ -1,0 +1,13 @@
+{{/* 
+  Unpack raw Zotero bibliography items, compatible with filter-items.
+  
+  Returns slice of bibliography items (.data member only).
+  
+  @param {slice} The raw bibliography items.
+*/}}
+{{ $items := . }}
+{{ $unpacked := slice }} 
+{{ range $items }}
+  {{ $unpacked = $unpacked | append .data }}
+{{ end }}
+{{ return $unpacked }}
