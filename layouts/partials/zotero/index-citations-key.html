@@ -1,0 +1,14 @@
+{{/*
+  Returns a map with citations indexed by key.
+  
+  @param {slice} The slice of citations.
+*/}}
+{{ $citations := . }}
+{{ $index := newScratch }}
+
+{{ range $citations }}
+  {{ $key := .key }}
+  {{ $index.Set $key . }}
+{{ end }}
+
+{{ return $index }}

@@ -1,3 +1,13 @@
+{{/*
+  Filter bibliography items based on fields or citations. 
+
+  Returns slice of items (only .data member).
+  
+  @params {slice} items The raw Zotero bibliography items.
+  @params {map} params The field names and values to match.
+  @params {boolean} onlyCited If only cited items should be returned.
+  @params {slice} citedTitles The list of cited titles.
+*/}}
 {{- $items := .items -}}
 {{- $params := .params -}}
 {{- $onlyCited := .onlyCited -}}
