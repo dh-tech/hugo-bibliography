@@ -30,9 +30,9 @@
     {{- $authors := slice -}}
     {{- range $entry.creators }}
 
-    {{- if eq $entry.creatorType "author" }}
-    {{- if $entry.lastName }}
-    {{- $name := printf "%s" $entry.lastName}}
+    {{- if eq .creatorType "author" }}
+    {{- if .lastName }}
+    {{- $name := printf "%s" .lastName}}
     {{- $authors = $authors | append $name }}
     {{- end }}
     {{- end }}

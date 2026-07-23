@@ -3,6 +3,7 @@
         margin-bottom: 1rem;
         text-indent: -2rem;
         padding-left: 2rem;
+        list-style-type: none;
     }
 </style>
 
@@ -10,7 +11,7 @@
 {{- $citations := slice -}}
 
 {{- $context := . }}
-{{- $onlyCited := and $context.IsNamedParams (eq ($context.Get "cited") "true") }}
+{{- $onlyCited := true }}
 
 {{- $citedTitles := slice -}}
 {{- if $onlyCited }}
@@ -49,7 +50,7 @@
 
 {{ $collections := partial "zotero/build-collection-tree.html" site.Params.groupId }}
 
-<ul style="list-style-type: none;" class="apa-citation-list">
+<ul class="apa-citation-list">
   {{- range $citation := $citations }}
     {{- $cols := $citation.citation.collections | default (slice) }}
     {{- if eq (len $cols) 0 }}
