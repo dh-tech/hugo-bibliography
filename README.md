@@ -19,13 +19,13 @@ params = { groupId = 1196 }
 
 All of the shortcodes rely on data fetched from Zotero based on the Zotero Group ID configured in your hugo.toml/hugo.yaml file.
 
-#### Bibliography
+### Bibliography
 
 To add a full bibliography, call the bibliography shortcode with the following:
 
 `{{<bibliography>}}`
 
-#### Filtering
+### Filtering
 
 You can add a parameter to limit the scope of the bibliography.
 
@@ -37,7 +37,7 @@ The value does not have to be an exact match to the key so long as the value is 
 
 This filtering also works to specify specific collections or subcollections to generate a bibliography for.
 
-#### Taxonomy/Tags
+### Taxonomy/Tags
 
 With the current version of hugo-bibliography, you can rig together a taxonomy by making markdown files that each dsiplay the bibliography for a specific tag.
 
@@ -66,7 +66,7 @@ If instead of filtering by a specific key-value pair, you would like to filter b
 
 Now, the bibliography will only include entries that have the keyword "some keyword" in any of the values of the entry. This property is particularly useful for generating bibliographies for particular authors, editors or projects.
 
-#### Cite
+### Cite
 
 To add an in-text citation, use the cite shortcode and specify the title of the work you want to cite. 
 
@@ -83,13 +83,17 @@ You can also generate a bibliography of the works that have been cited throughou
 Note that this feature requires site.Store which is only available in hugo 0.138.0 and above.
 
 
-#### Zotero detection
+### Zotero detection
 
 By default, hugo-bibliography includes COinS data to its bibliography shortcode. If you're using Zotero Connector, you should be able to save any and all of the bibliography citations into Zotero.
 
 ## Installation
 
-To use Hugo-bibliography, simply add the module as a theme in your hugo project.
+To use Hugo-bibliography, simply add the module as a theme in your hugo project. You can do this either as a git-submodule or as a [Hugo Module](https://gohugo.io/hugo-modules/use-modules/).
+
+### Git Submodule
+
+Run the following in your Hugo project directory to add Hugo-Bibliography as a git submodule to your themes directory:
 
 `git submodule add https://github.com/dh-tech/hugo-bibliography.git themes/hugo-bibliography`
 
@@ -97,12 +101,31 @@ Then add the theme in your hugo.toml file.
 
 `theme = ['hugo-bibliography']`
 
+### Hugo Module
+
+To use Hugo-Bibliography as a module, first initialize your Hugo project itself as a module:
+
+`hugo mod init github.com/user/project`
+
+Then load the Hugo-Bibliography module:
+
+`hugo mod get github.com/dh-tech/hugo-bibliography`
+
+and add the module to your `hugo.toml`:
+```
+[module]
+  [[module.imports]]
+    path = 'github.com/dh-tech/hugo-bibliography'
+```
+
 ## Customization
 
-Hugo-Bibliography can be customized in a few ways. The styling for the bibliography shortcode is contained within the bibliography shortcode's html file or /themes/hugo-bibliography/layouts/shortcodes/bibliography.html.
+Hugo-Bibliography can be customized by overwriting the theme's template files in your site instance. You can copy the files from the `themes/hugo-bibliography` directory if you installed it via git or check the [GitHub site](https://github.com/dh-tech/hugo-bibliography) if you installed as a Hugo Module.
+
+The styling for the bibliography shortcode is contained within the bibliography shortcode's html `layouts/shortcodes/bibliography.html`.
 
 You will notice the styling used for the apa-citation is contained at the top of the file. If you would like to change the bibliography's style (eg. type-face, font-size, padding) you can add your own style rules here. Note that the italics is done through i tags instead of style rules.
 
-As for changing the citation style itself, this can be done by modifying the layouts/partials/render/render-citation.html file for bibliography citations or layouts/shortcodes/cite.html for in-text citations.
+As for changing the citation style itself, this can be done by modifying the `layouts/partials/render/render-citation.html` file for bibliography citations or `layouts/shortcodes/cite.html` for in-text citations.
 
 
