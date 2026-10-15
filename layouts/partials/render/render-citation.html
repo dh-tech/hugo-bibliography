@@ -7,6 +7,10 @@
     {{- $year = index . 0 }}
   {{- end }}
 {{- end }}
+{{- $accessed := "" }}
+{{- with $data.accessDate }}
+  {{- $accessed = time.Format "January 2, 2006" . }}
+{{- end }}
 
 {{- $title := $data.title | markdownify | plainify }}
 {{- $journal := or $data.publicationTitle $data.bookTitle $data.seriesTitle $data.proceedingsTitle }}
@@ -29,7 +33,7 @@
     {{ if $title }}<span class="citation-title">{{ $title }}</span>.{{ end }}
     {{ if $websiteTitle }}<span class="citation-website"><i>{{ $websiteTitle }}</i></span>.{{ end }}
     {{ if $encyclopediaTitle }}<span class="citation-encyclopedia"><i>{{ $encyclopediaTitle }}</i></span>.{{ end }}
-    {{ if $url }}<a class="citation-url" href="{{ $url }}">{{ $url }}</a>{{ end }}
+    {{ if $url }}{{ if $accessed }}<span class="citation-accessed">Retrieved {{ $accessed }}, from</span> {{ end }}<a class="citation-url" href="{{ $url }}">{{ $url }}</a>{{ end }}
     {{ if $doi }}<a class="citation-doi" href="https://doi.org/{{ $doi }}">https://doi.org/{{ $doi }}</a>{{ end }}
     <span class="Z3988" title="ctx_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.atitle={{ urlquery $title }}&rft.jtitle={{ urlquery $journal }}&rft.date={{ $year }}&rft.au={{ urlquery $authorStr }}&rft.volume={{ $volume }}&rft.issue={{ $issue }}&rft.spage={{ index (split $pages "-") 0 }}&rft.epage={{ index (split $pages "-") 1 }}&rft_id=info:doi/{{ $doi }}">
     </span>
