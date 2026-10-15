@@ -48,9 +48,15 @@
   {{ end }}
 </ul>
 {{else}}
+
+{{/* citations has all citations right here, it needs to be rendering citations that are only in the top level collection aka not in a subfolder */}}
+
 <ul class="apa-citation-list">
   {{ range $citations }}
-    {{ partial "render/render-citation.html" . }}
+    {{ $collectionKeys := .citation.collections | default (slice) }}
+    {{ if in $collectionKeys "0" }}
+        {{ partial "render/render-citation.html" . }}
+    {{ end }}
   {{ end }}
   {{ range $collections }}
     {{ partial "render/render-collection.html" (dict
