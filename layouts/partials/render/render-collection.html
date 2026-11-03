@@ -25,6 +25,7 @@
   {{/* Render children recursively */}}
   {{ with $collection.children }}
       {{ range . }}
-        {{ partial "render-collection.html" (dict "collection" . "citations" $allCitations) }}
+        {{ partial "render/render-collection.html" (dict "collection" . "citations" $allCitations "singleCollection" $singleCollection) }}
       {{ end }}
   {{ end }}
+
