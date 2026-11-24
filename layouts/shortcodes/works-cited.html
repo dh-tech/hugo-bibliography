@@ -7,30 +7,35 @@
     }
 </style>
 
-{{/* fetch */}}
-{{- $citations := slice -}}
+{{/*
+  Site-wide bibliography: renders every Zotero item that is cited anywhere on
+  the site with {{< cite title="..." >}} or {{< popup-citation title="..." >}}.
+
+  Cited titles are collected by scanning the raw content of every page at build
+  time. Hugo renders pages in parallel and in no guaranteed order, so a shared
+  store filled in by the cite shortcodes (site.Store) is not reliable here:
+  this page may render before the pages it needs to know about.
+*/}}
 
 {{- $context := . }}
-{{- $onlyCited := true }}
-
-{{- $citedTitles := slice -}}
-{{- if $onlyCited }}
-  {{- $citedTitles = .Site.Store.Get "cited_titles" | default (slice) -}}
-{{- else }}
-  {{- $citedTitles = .Site.Store.Get "bib-record" | default (slice) -}}
-  {{- $onlyCited = true }}
-{{- end }}
-
-{{- $hasFilters := and $context.IsNamedParams (gt (len $context.Params) 0) }}
 {{- $authorParam := $context.Get "authorNum" | default "3" }}
 {{- $authorNum := int $authorParam }}
 
+{{- /* Collect cited titles from every page's source. */ -}}
+{{- $citedTitles := slice }}
+{{- $shortcodeRE := `\{\{[<%]\s*(?:cite|popup-citation)\s[^>%]*?title\s*=\s*"([^"]+)"` }}
+{{- range site.Pages }}
+  {{- range findRESubmatch $shortcodeRE .RawContent }}
+    {{- $citedTitles = $citedTitles | append (index . 1) }}
+  {{- end }}
+{{- end }}
+{{- $citedTitles = $citedTitles | uniq }}
+
+{{- /* Only named params other than authorNum act as filters (e.g. collections="X"). */ -}}
 {{- $singleCollection := false }}
-{{- if $hasFilters }}
-  {{- range $key, $val := $context.Params }}
-    {{- if eq $key "collections" }}
-      {{- $singleCollection = true }}
-    {{- end }}
+{{- if $context.IsNamedParams }}
+  {{- if $context.Get "collections" }}
+    {{- $singleCollection = true }}
   {{- end }}
 {{- end }}
 
@@ -39,7 +44,7 @@
 {{ $filtered := partial "zotero/filter-items.html" (dict
   "items"       $items
   "params"      $context.Params
-  "onlyCited"   $onlyCited
+  "onlyCited"   true
   "citedTitles" $citedTitles
 ) }}
 
@@ -51,6 +56,7 @@
 {{ $collections := partial "zotero/build-collection-tree.html" site.Params.groupId }}
 
 <ul class="apa-citation-list">
+  {{- /* Cited items that are not in any collection */ -}}
   {{- range $citation := $citations }}
     {{- $cols := $citation.citation.collections | default (slice) }}
     {{- if eq (len $cols) 0 }}
@@ -58,6 +64,7 @@
     {{- end }}
   {{- end }}
 
+  {{- /* Cited items grouped by collection (empty collections are skipped) */ -}}
   {{- range $collections }}
     {{- partial "render/render-collection.html" (dict
       "collection"       .
@@ -65,4 +72,4 @@
       "singleCollection" $singleCollection
     ) }}
   {{- end }}
-</ul> </ul>
+</ul>
